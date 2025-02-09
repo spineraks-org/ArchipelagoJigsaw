@@ -1,35 +1,78 @@
-nx = 5
-ny = 5
+import random
 
-pieces = [1, 9, 14]
 
-pieces_groups = []
-for p in pieces:
-    pieces_groups.append([p])
+nx = 600
+ny = 600
 
-def is_match(p1, p2):
-    if p2 < p1:
-        return is_match(p2, p1)
-    if p2 - p1 == 1 and p1 % nx != 0:
-        return True
-    if p2 - p1 == nx:
-        return True
-    return False
+# random.seed(1)
+pieces = random.sample(range(1, nx * ny + 1), 300000)
 
-def group_groups(pieces_groups):
-    for i, group1 in enumerate(pieces_groups):
-        for j, group2 in enumerate(pieces_groups[i+1:]):
-            for p1 in group1:
-                for p2 in group2:
-                    if is_match(p1, p2):
-                        group1.extend(group2)
-                        pieces_groups.remove(group2)
-                        return True, pieces_groups
-    return False, pieces_groups
-                    
-while True:
-    matched, pieces_groups = group_groups(pieces_groups)
-    if not matched:
-        break
+def group_groups(pieces):
+    pieces_set = set(pieces)
+    all_groups = []
     
-print(len(pieces_groups), len(pieces) - len(pieces_groups))
+    while pieces_set:
+        current_group = [pieces_set.pop()]
+        ind = 0
+        
+        while ind < len(current_group):
+            piece = current_group[ind]
+            ind += 1
+            candidates = []
+            if piece > nx:
+                candidates.append(piece - nx)
+            if piece < nx * (ny - 1):
+                candidates.append(piece + nx)
+            if piece % nx != 1:
+                candidates.append(piece - 1)
+            if piece % nx != 0:
+                candidates.append(piece + 1)
+                
+            for candidate in candidates:
+                if candidate in pieces_set:
+                    current_group.append(candidate)
+                    pieces_set.remove(candidate)
+        all_groups.append(current_group)
+    return all_groups
+
+def group_groups2(pieces):
+    pieces_set = set(pieces)
+    
+    parent = {i: i for i in pieces_set}
+    
+    def find(x):
+        if x not in parent:
+            return None
+        if parent[x] != x:
+            parent[x] = find(parent[x])
+        return parent[x]
+    
+    def union(x, y):
+        rootX = find(x)
+        rootY = find(y)
+        if rootX and rootY and rootX != rootY:
+            parent[rootY] = rootX
+    
+    for piece in pieces_set:
+        if piece > nx:
+            union(piece, piece - nx)
+        if piece < nx * (ny - 1):
+            union(piece, piece + nx)
+        if piece % nx != 1:
+            union(piece, piece - 1)
+        if piece % nx != 0:
+            union(piece, piece + 1)
+    
+    groups = set(find(piece) for piece in pieces_set)
+    
+    return len(pieces) - len(groups)
+
+print("1:")
+pieces_groups = group_groups(pieces)
+a = len(pieces) - len(pieces_groups)
+print(a)
+                    
+print("2:")
+pieces_groups = group_groups2(pieces)
+b = pieces_groups
+print(b)

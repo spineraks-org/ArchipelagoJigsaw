@@ -1,43 +1,30 @@
 from dataclasses import dataclass
 
-from Options import PerGameCommonOptions, Range
+from Options import Choice, PerGameCommonOptions, Range
 
 class NumberOfPieces(Range):
     """
     Approximate number of pieces in the puzzle.
+    I'm really hoping to increase the max, but with more pieces it becomes really slow...
     """
 
     display_name = "Number of pieces"
     range_start = 25
-    range_end = 1000
+    range_end = 150
     default = 25
     
-class WidthOfImage(Range):
+class OrientationOfImage(Choice):
     """
-    If you're using a custom image, this is the width (in pixels) of your image.
-    Input this correctly to get nice square-like puzzle pieces.
-    The default value is the width of the default image used in the game.
+    If you're using a custom image, Selection the orientation here.
     """
 
-    display_name = "Width of image"
-    range_start = 1
-    range_end = 100000
-    default = 2034
-    
-class HeightOfImage(Range):
-    """
-    If you're using a custom image, this is the height (in pixels) of your image.
-    Input this correctly to get nice square-like puzzle pieces.
-    The default value is the height of the default image used in the game.
-    """
-
-    display_name = "Height of image"
-    range_start = 1
-    range_end = 100000
-    default = 2112
+    display_name = "Orientation of image"
+    option_square = 1
+    option_landscape = 2
+    option_portrait = 3
+    default = 1
 
 @dataclass
 class JigsawOptions(PerGameCommonOptions):
     number_of_pieces: NumberOfPieces
-    width_of_image: WidthOfImage
-    height_of_image: HeightOfImage
+    orientation_of_image: OrientationOfImage

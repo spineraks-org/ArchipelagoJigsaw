@@ -22,41 +22,38 @@ def set_jigsaw_rules(world: MultiWorld, player: int, nx: int, ny: int):
         )
         
 def count_number_of_matches_state(state, player, nx, ny):
-    pieces = []
-    for i in range(1, nx * ny + 1):
-        if state.has(f"Puzzle Piece {i}", player):
-            pieces.append(i)
+    pieces = [int(m[13:]) for m in state.prog_items[player]]
     t = count_number_of_matches_pieces(pieces, nx, ny)
     return t
         
 def count_number_of_matches_pieces(pieces, nx, ny):
-    pieces_groups = []
-    for p in pieces:
-        pieces_groups.append([p])
-
-    def is_match(p1, p2):
-        if p2 < p1:
-            return is_match(p2, p1)
-        if p2 - p1 == 1 and p1 % nx != 0:
-            return True
-        if p2 - p1 == nx:
-            return True
-        return False
-
-    def group_groups(pieces_groups):
-        for i, group1 in enumerate(pieces_groups):
-            for j, group2 in enumerate(pieces_groups[i+1:]):
-                for p1 in group1:
-                    for p2 in group2:
-                        if is_match(p1, p2):
-                            group1.extend(group2)
-                            pieces_groups.remove(group2)
-                            return True, pieces_groups
-        return False, pieces_groups
-                        
-    while True:
-        matched, pieces_groups = group_groups(pieces_groups)
-        if not matched:
-            break
-        
+    pieces_groups = group_groups(pieces, nx, ny)
     return len(pieces) - len(pieces_groups)
+
+def group_groups(pieces, nx, ny):
+    pieces_set = set(pieces)
+    all_groups = []
+    
+    while pieces_set:
+        current_group = [pieces_set.pop()]
+        ind = 0
+        
+        while ind < len(current_group):
+            piece = current_group[ind]
+            ind += 1
+            candidates = []
+            if piece > nx:
+                candidates.append(piece - nx)
+            if piece < nx * (ny - 1):
+                candidates.append(piece + nx)
+            if piece % nx != 1:
+                candidates.append(piece - 1)
+            if piece % nx != 0:
+                candidates.append(piece + 1)
+                
+            for candidate in candidates:
+                if candidate in pieces_set:
+                    current_group.append(candidate)
+                    pieces_set.remove(candidate)
+        all_groups.append(current_group)
+    return all_groups

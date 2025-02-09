@@ -8,7 +8,7 @@ from worlds.AutoWorld import WebWorld, World
 from .Items import JigsawItem, item_table
 from .Locations import JigsawLocation, location_table
 
-from .Options import JigsawOptions
+from .Options import JigsawOptions, OrientationOfImage
 from .Rules import set_jigsaw_rules, count_number_of_matches_pieces
 from worlds.generic.Rules import set_rule
 
@@ -41,7 +41,7 @@ class JigsawWorld(World):
 
     location_name_to_id = {name: data.id for name, data in location_table.items()}
     
-    ap_world_version = "0.0.1"
+    ap_world_version = "0.0.2"
 
     def _get_jigsaw_data(self):
         return {
@@ -52,7 +52,7 @@ class JigsawWorld(World):
             "race": self.multiworld.is_race,
         }
         
-    def calculate_optimal_nx_and_ny(self, number_of_pieces, width, height):
+    def calculate_optimal_nx_and_ny(self, number_of_pieces, orientation):
         def mround(x):
             return int(round(x))
 
@@ -61,6 +61,9 @@ class JigsawWorld(World):
 
         def mabs(x):
             return abs(x)
+        
+        height = 1
+        width = orientation
 
         nHPieces = mround(msqrt(number_of_pieces * width / height))
         nVPieces = mround(number_of_pieces / nHPieces)
@@ -82,10 +85,13 @@ class JigsawWorld(World):
 
         return optimal_nx, optimal_ny
         
-    def generate_early(self):
-        self.nx, self.ny = self.calculate_optimal_nx_and_ny(self.options.number_of_pieces.value, 
-                                                            self.options.width_of_image.value, 
-                                                            self.options.height_of_image.value)
+    def generate_early(self):        
+        self.orientation = 1
+        if self.options.orientation_of_image == OrientationOfImage.option_landscape:
+            self.orientation = 1.5
+        if self.options.orientation_of_image == OrientationOfImage.option_portrait:
+            self.orientation = 0.8
+        self.nx, self.ny = self.calculate_optimal_nx_and_ny(self.options.number_of_pieces.value, self.orientation)
         self.npieces = self.nx * self.ny
         
         self.pool_pieces = [i for i in range(1, self.npieces + 1)]
@@ -93,7 +99,7 @@ class JigsawWorld(World):
         
         start_pieces = []
         
-        while count_number_of_matches_pieces(start_pieces, self.nx, self.ny) < 3:
+        while count_number_of_matches_pieces(start_pieces, self.nx, self.ny) < max(3, math.pow(self.nx * self.ny, 0.4)):
             start_pieces.append(self.pool_pieces.pop(0))
         
         self.pool_pieces = [f"Puzzle Piece {i}" for i in self.pool_pieces]                
@@ -141,15 +147,17 @@ class JigsawWorld(World):
         
     def create_item(self, name: str) -> Item:
         item_data = item_table[name]
-        item = JigsawItem(name, item_data.classification, item_data.code, self.player)
+        item = JigsawItem(name, item_data.classification, item_data.code, self.player, item_data.piece_nr)
         return item
 
     def fill_slot_data(self):
-            """
-            make slot data, which consists of jigsaw_data, options, and some other variables.
-            """
-            slot_data = self._get_jigsaw_data()
-            
-            slot_data["nx"] = self.nx
-            slot_data["ny"] = self.ny
-            return slot_data
+        """
+        make slot data, which consists of jigsaw_data, options, and some other variables.
+        """
+        slot_data = self._get_jigsaw_data()
+        
+        slot_data["orientation"] = self.orientation
+        slot_data["nx"] = self.nx
+        slot_data["ny"] = self.ny
+        return slot_data
+    
