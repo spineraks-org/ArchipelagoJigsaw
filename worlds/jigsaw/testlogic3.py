@@ -46,7 +46,8 @@ def main():
 # if __name__ == "__main__":
 #     cProfile.run('main()')
     
-def add_piece(previous_solution, piece, nx, ny):  # recalculate groups when one piece is added
+def add_piece(previous_solution, piece, nx, ny):  # recalculate groups when one piece is added [[1,2], [8,9], [....]]
+                                                    #  when I add 3 -> [[1,2,3,8,9], ...]
     pieces_to_merge = set()
     if piece <= nx * (ny - 1):
         pieces_to_merge.add(piece + nx)
