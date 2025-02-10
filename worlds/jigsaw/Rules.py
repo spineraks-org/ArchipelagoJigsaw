@@ -44,7 +44,7 @@ def group_groups(pieces, nx, ny):
             candidates = []
             if piece > nx:
                 candidates.append(piece - nx)
-            if piece < nx * (ny - 1):
+            if piece <= nx * (ny - 1):
                 candidates.append(piece + nx)
             if piece % nx != 1:
                 candidates.append(piece - 1)
