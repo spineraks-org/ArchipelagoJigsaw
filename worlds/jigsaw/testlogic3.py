@@ -1,7 +1,9 @@
+# this very quickly script shows that the new logic is 10x faster when adding pieces one by one
+
 import random
 import cProfile
 
-def N(pieces, nx, ny):
+def N(pieces, nx, ny):  # old logic, calculate every instance anew
     pieces_set = set(pieces)
     all_groups = []
     
@@ -44,7 +46,7 @@ def main():
 # if __name__ == "__main__":
 #     cProfile.run('main()')
     
-def add_piece(previous_solution, piece, nx, ny):
+def add_piece(previous_solution, piece, nx, ny):  # recalculate groups when one piece is added
     pieces_to_merge = set()
     if piece <= nx * (ny - 1):
         pieces_to_merge.add(piece + nx)
