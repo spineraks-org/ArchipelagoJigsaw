@@ -15,10 +15,7 @@ def set_jigsaw_rules(world: MultiWorld, player: int, nx: int, ny: int):
     for location in world.get_locations(player):
         set_rule(
             location,
-            lambda state, curmatches=location.nmatches, player=player: count_number_of_matches_state(
-                state, player, nx, ny
-            )
-            >= curmatches,
+            lambda state, curmatches=location.nmatches, player=player: state._jc_matches_count(player) >= curmatches,
         )
         
 def count_number_of_matches_state(state, player, nx, ny):

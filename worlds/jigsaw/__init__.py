@@ -3,13 +3,13 @@ from typing import Dict
 
 from BaseClasses import CollectionState, Entrance, Item, ItemClassification, Location, Region, Tutorial
 
-from worlds.AutoWorld import WebWorld, World
+from worlds.AutoWorld import WebWorld, World, LogicMixin
 
 from .Items import JigsawItem, item_table
 from .Locations import JigsawLocation, location_table
 
 from .Options import JigsawOptions, OrientationOfImage
-from .Rules import set_jigsaw_rules, count_number_of_matches_pieces
+from .Rules import set_jigsaw_rules, count_number_of_matches_pieces, count_number_of_matches_state
 from worlds.generic.Rules import set_rule
 
 
@@ -160,4 +160,34 @@ class JigsawWorld(World):
         slot_data["nx"] = self.nx
         slot_data["ny"] = self.ny
         return slot_data
+
+    def collect(self, state, item):
+        state._jc_stale[item.player] = True
+        return super().collect(state, item)
+
+    def remove(self, state, item):
+        state._jc_stale[item.player] = True
+        return super().remove(state, item)
     
+
+class jigsawMixin(LogicMixin):
+    _jc_stale: dict[int, bool]
+    _jc_cache: dict[int, int]
+
+    def init_mixin(self, multiworld):
+        players = multiworld.get_game_players("Jigsaw")
+        self._jc_stale = {player: True for player in players}
+        self._jc_cache = {player: 0 for player in players}
+
+    def copy_mixin(self, other):
+        other._jc_stale = self._jc_stale.copy()
+        other._jc_cache = self._jc_cache.copy()
+        return other
+
+    def _jc_matches_count(self, player):
+        if self._jc_stale[player]:
+            world = self.multiworld.worlds[player]
+            self._jc_cache[player] = count_number_of_matches_state(self, player, world.nx, world.ny)
+            self._jc_stale[player] = False
+        return self._jc_cache[player]
+
