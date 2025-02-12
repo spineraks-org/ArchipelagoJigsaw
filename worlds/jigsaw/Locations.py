@@ -10,8 +10,8 @@ class LocData(typing.NamedTuple):
 class JigsawLocation(Location):
     game: str = "Jigsaw"
 
-    def __init__(self, player: int, name: str, nmatches: int, address: typing.Optional[int], parent):
+    def __init__(self, player: int, name: str, address: typing.Optional[int], nmerges: int, parent):
         super().__init__(player, name, address, parent)
-        self.nmatches = nmatches
+        self.nmerges = nmerges
 
-location_table = {f"Connect {i} Pieces": LocData(234782000 + i, "Board") for i in range(2, 1601)}
+location_table = {f"Merge {i} times": LocData(234782000 + i, "Board") for i in range(1, 1601)}

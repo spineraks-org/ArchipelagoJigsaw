@@ -7,23 +7,6 @@ from BaseClasses import MultiWorld
 from worlds.generic.Rules import set_rule
 
 
-def set_jigsaw_rules(world: MultiWorld, player: int, nx: int, ny: int):
-    """
-    Sets rules on reaching matches
-    """
-
-    for location in world.get_locations(player):
-        set_rule(
-            location,
-            lambda state, curmatches=location.nmatches, player=player: count_number_of_matches_state(
-                state, player, nx, ny
-            )
-            >= curmatches,
-        )
-        
-def count_number_of_matches_state(state, player, nx, ny):
-    return state.prog_items[player]["merges"]
-
 def add_piece(previous_solution, piece, nx, ny):
     pieces_to_merge = set()
     if piece <= nx * (ny - 1):
