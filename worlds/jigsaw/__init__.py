@@ -9,7 +9,7 @@ from .Items import JigsawItem, item_table
 from .Locations import JigsawLocation, location_table
 
 from .Options import JigsawOptions, OrientationOfImage
-from .Rules import set_jigsaw_rules, count_number_of_matches_pieces
+from .Rules import add_piece, remove_piece, set_jigsaw_rules
 from worlds.generic.Rules import set_rule
 
 
@@ -98,10 +98,13 @@ class JigsawWorld(World):
         self.multiworld.random.shuffle(self.pool_pieces)
         
         start_pieces = []
-        
-        while count_number_of_matches_pieces(start_pieces, self.nx, self.ny) < max(3, math.pow(self.nx * self.ny, 0.4)):
-            start_pieces.append(self.pool_pieces.pop(0))
-        
+        start_clusters = []
+        merges = 0
+        while merges < max(3, math.pow(self.nx * self.ny, 0.4)):
+            p = self.pool_pieces.pop(0)
+            start_pieces.append(p)
+            start_clusters, merges = add_piece(start_clusters, p, self.nx, self.ny)
+                
         self.pool_pieces = [f"Puzzle Piece {i}" for i in self.pool_pieces]                
         
         for i in start_pieces:
@@ -161,3 +164,27 @@ class JigsawWorld(World):
         slot_data["ny"] = self.ny
         return slot_data
     
+    # We overwrite these function to monitor when states have changed. See also dice_simulation in Rules.py
+    def collect(self, state: CollectionState, item: Item) -> bool:
+        change = super().collect(state, item)
+        if change:  # if something changed
+            if state.prog_items[self.player]["clusters"] == 0:  # initialize clusters if it's not ini'd yet
+                state.prog_items[self.player]["clusters"] = []
+                
+            # update clusters and number of merges
+            state.prog_items[self.player]["clusters"], state.prog_items[self.player]["merges"] = \
+                add_piece(state.prog_items[self.player]["clusters"], item.piece_nr, self.nx, self.ny)
+            # print(state.prog_items[self.player], state.prog_items[self.player]["clusters"], state.prog_items[self.player]["merges"])
+        return change
+
+    def remove(self, state: CollectionState, item: Item) -> bool:
+        change = super().remove(state, item)
+        if change:  # if something changed
+            if state.prog_items[self.player]["clusters"] == 0:  # initialize clusters if it's not ini'd yet
+                state.prog_items[self.player]["clusters"] = []
+                
+            # update clusters and number of merges
+            state.prog_items[self.player]["clusters"], state.prog_items[self.player]["merges"] = \
+                remove_piece(state.prog_items[self.player]["clusters"], item.piece_nr, self.nx, self.ny)
+            # print(state.prog_items[self.player], state.prog_items[self.player]["clusters"], state.prog_items[self.player]["merges"])
+        return change

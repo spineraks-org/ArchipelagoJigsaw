@@ -10,12 +10,12 @@ class NumberOfPieces(Range):
 
     display_name = "Number of pieces"
     range_start = 25
-    range_end = 1000
+    range_end = 250
     default = 25
     
 class OrientationOfImage(Choice):
     """
-    If you're using a custom image, Selection the orientation here.
+    If you're using a custom image, select the orientation here.
     """
 
     display_name = "Orientation of image"
