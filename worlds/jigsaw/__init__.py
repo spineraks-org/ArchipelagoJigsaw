@@ -1,5 +1,5 @@
 import math
-from typing import Dict, TextIO
+from typing import Any, Dict, TextIO
 
 from BaseClasses import CollectionState, Entrance, Item, ItemClassification, Location, Region, Tutorial
 
@@ -44,15 +44,11 @@ class JigsawWorld(World):
     
     item_name_groups = item_groups
     
-    ap_world_version = "0.0.2"
+    ap_world_version = "0.1.0"
 
     def _get_jigsaw_data(self):
         return {
-            # "world_seed": self.multiworld.per_slot_randoms[self.player].getrandbits(32),
             "seed_name": self.multiworld.seed_name,
-            "player_name": self.multiworld.get_player_name(self.player),
-            "player_id": self.player,
-            "race": self.multiworld.is_race,
         }
         
     def calculate_optimal_nx_and_ny(self, number_of_pieces, orientation):
@@ -157,12 +153,7 @@ class JigsawWorld(World):
         for i in range(1, self.npieces):
             self.pieces_needed_per_merge.append(next(index for index, value in enumerate(self.possible_merges) if value >= i))
         
-        print(self.precollected_pieces)
-        print(self.possible_merges)
-        print(self.pieces_needed_per_merge)
-        
         pieces_left = math.ceil(len(self.itempool_pieces) * (1 + self.options.percentage_of_extra_pieces.value / 100))
-                
                 
         if pieces_left / (self.npieces - 2) < 1:
             self.pool_pieces = [f"Puzzle Piece" for i in range(pieces_left)]                
@@ -238,7 +229,14 @@ class JigsawWorld(World):
         slot_data["piece_order"] = self.precollected_pieces + self.itempool_pieces
         slot_data["possible_merges"] = self.possible_merges
         slot_data["actual_possible_merges"] = self.actual_possible_merges
+        slot_data["ap_world_version"] = self.ap_world_version
         return slot_data
+    
+    def interpret_slot_data(self, slot_data: Dict[str, Any]):
+        self.possible_merges = slot_data["possible_merges"]
+        self.pieces_needed_per_merge = [0]
+        for i in range(1, self.npieces):
+            self.pieces_needed_per_merge.append(next(index for index, value in enumerate(self.possible_merges) if value >= i))
 
     def write_spoiler(self, spoiler_handle: TextIO) -> None:
         spoiler_handle.write(f"\nPuzzle dimension {self.nx} {self.ny}\n")

@@ -25,7 +25,7 @@ item_table = {
 }
 
 item_groups = {
-    "Puzzle Piece": {
+    "Puzzle Pieces": {
         "Puzzle Piece", 
         "2 Puzzle Pieces"
     }
