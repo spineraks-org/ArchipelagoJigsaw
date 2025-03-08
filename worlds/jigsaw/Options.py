@@ -1,17 +1,40 @@
 from dataclasses import dataclass
 
-from Options import Choice, PerGameCommonOptions, Range
+from Options import Choice, PerGameCommonOptions, Range, Toggle
 
 class NumberOfPieces(Range):
     """
     Approximate number of pieces in the puzzle.
-    I'm really hoping to increase the max, but with more pieces it becomes really slow...
     """
 
     display_name = "Number of pieces"
     range_start = 25
     range_end = 1000
     default = 25
+    
+class AllowFillerItems(Toggle):
+    """
+    If this option is enabled, the pool will contain several Squawks.
+    Squawks is the green-feathered parrot that helps Donkey Kong find puzzle pieces, but in this game they're useless.
+    If this option is disabled, no filler items will be in the pool and every item will be one or more puzzle pieces.
+    """
+
+    display_name = "Allow filler item"
+    default = False
+    
+class PercentageOfMergesThatAreChecks(Range):
+    """
+    This option affects the number of checks that are in the pool.
+    100 means every merge will be a check. So with 500 merges, there will be 500 checks.
+    10 means 10% of all merges will result in a check. If you have 500 merges, there will be 50 checks.
+    If you have selected fewer checks, items like "5 Puzzle Pieces" will be shuffled into the pool.
+    Note that 100% may not be reached if you disable filler items, in that case there will simply be less checks.
+    """
+
+    display_name = "Percentage of merges that are checks"
+    range_start = 10
+    range_end = 100
+    default = 100
     
 class OrientationOfImage(Choice):
     """
@@ -22,7 +45,20 @@ class OrientationOfImage(Choice):
     option_square = 1
     option_landscape = 2
     option_portrait = 3
-    default = 1
+    default = 2
+
+
+class WhichImage(Range):
+    """
+    *ONLY IF YOU SELECTED A LANDSCAPE IMAGE*
+    This option will decide which landscape picture will be set for you. Don't worry, you can change it in the game.
+    Every number corresponds to a set image. See the images here: https://jigsaw-ap.netlify.app/images.html
+    """
+    
+    display_name = "Which image"
+    range_start = 1
+    range_end = 16
+    default = "random"
     
 class PercentageOfExtraPieces(Range):
     """
@@ -37,17 +73,57 @@ class PercentageOfExtraPieces(Range):
     range_end = 100
     default = 10
     
+class PieceTypeOrder(Choice):
+    """
+    This option affects the order in which you receive puzzle piece types (corners, edges, normal).
+    This is prioritized over the Piece Order option.
+    """
+
+    display_name = "Piece type order"
+    option_random_order = 1
+    option_corners_edges_normal = 2
+    option_normal_edges_corners = 3
+    option_edges_normal_corners = 4
+    option_corners_normal_edges = 5
+    option_normal_corners_edges = 6
+    option_edges_corners_normal = 7
+    default = 1
+    
+class StrictnessPieceTypeOrder(Range): 
+    """
+    This option determines how strictly the above piece type order is followed.
+    1 means it is barely followed, 100 means it is followed in the strictest way possible.
+    """
+
+    display_name = "Strictness piece type order"
+    range_start = 1
+    range_end = 100
+    default = 100
+    
 class PieceOrder(Choice):
     """
     This option affects the order in which you receive puzzle pieces.
     random_order: pieces are added in random order with no extra constraints whatsoever
-    corners_edges_rest: corners have the highest chance to appear first, then edges, then the other pieces
+    every_piece_fits: every piece you receive, will be able to merge with another piece
+    least_merges_possible: you will receive pieces in an order that gives the least number of possible merges
     """
 
     display_name = "Piece order"
     option_random_order = 1
-    option_corners_edges_rest = 2
+    option_every_piece_fits = 3
+    option_least_merges_possible = 4
     default = 1
+    
+class StrictnessPieceOrder(Range): 
+    """
+    This option determines how strictly the above piece order is followed.
+    1 means it is barely followed, 100 means it is followed in the strictest way possible.
+    """
+
+    display_name = "Strictness piece order"
+    range_start = 1
+    range_end = 100
+    default = 100
     
 class NumberOfChecksOutOfLogic(Range):
     """
@@ -62,10 +138,17 @@ class NumberOfChecksOutOfLogic(Range):
     range_end = 10
     default = 1
 
+
 @dataclass
 class JigsawOptions(PerGameCommonOptions):
     number_of_pieces: NumberOfPieces
+    allow_filler_items: AllowFillerItems
+    percentage_of_merges_that_are_checks: PercentageOfMergesThatAreChecks
     orientation_of_image: OrientationOfImage
+    which_image: WhichImage
     percentage_of_extra_pieces: PercentageOfExtraPieces
+    piece_order_type: PieceTypeOrder
+    strictness_piece_order_type: StrictnessPieceTypeOrder
     piece_order: PieceOrder
+    strictness_piece_order: StrictnessPieceOrder
     number_of_checks_out_of_logic: NumberOfChecksOutOfLogic
