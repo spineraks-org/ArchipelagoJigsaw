@@ -36,6 +36,20 @@ class PercentageOfMergesThatAreChecks(Range):
     range_end = 100
     default = 100
     
+class MaximumNumberOfChecks(Range):
+    """
+    The pool can be filled with puzzle pieces really quickly. 
+    When there are hundred of puzzle pieces in the pool, it really changes the dynamics in multiworlds.
+    As such, by default, there are at most 100 checks and items for Jigsaw.
+    If you choose a larger puzzle, you will receive multiple pieces at once.
+    This setting overrides the previous option.
+    """
+    
+    display_name = "Maximum number of checks"
+    range_start = 25
+    range_end = 1000
+    default = 100
+    
 class OrientationOfImage(Choice):
     """
     If you're using a custom image, select the orientation here.
@@ -50,7 +64,7 @@ class OrientationOfImage(Choice):
 
 class WhichImage(Range):
     """
-    *ONLY IF YOU SELECTED A LANDSCAPE IMAGE*
+    *ONLY IF YOU SELECTED THE LANDSCAPE ORIENTATION*
     This option will decide which landscape picture will be set for you. Don't worry, you can change it in the game.
     Every number corresponds to a set image. See the images here: https://jigsaw-ap.netlify.app/images.html
     """
@@ -63,6 +77,7 @@ class WhichImage(Range):
 class PercentageOfExtraPieces(Range):
     """
     This option allows for there being more pieces in the pool than necessary.
+    When you have all your items already, the additional don't do anything anymore.
     0 means there are exactly enough pieces in the pool.
     100 means there are twice as many pieces in the pool than necessary.
     That means you would only need half of your items to finish the game.
@@ -142,9 +157,10 @@ class NumberOfChecksOutOfLogic(Range):
 @dataclass
 class JigsawOptions(PerGameCommonOptions):
     number_of_pieces: NumberOfPieces
+    orientation_of_image: OrientationOfImage
     allow_filler_items: AllowFillerItems
     percentage_of_merges_that_are_checks: PercentageOfMergesThatAreChecks
-    orientation_of_image: OrientationOfImage
+    maximum_number_of_checks: MaximumNumberOfChecks
     which_image: WhichImage
     percentage_of_extra_pieces: PercentageOfExtraPieces
     piece_order_type: PieceTypeOrder

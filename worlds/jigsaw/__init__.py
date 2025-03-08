@@ -219,7 +219,10 @@ class JigsawWorld(World):
         
         pieces_left = math.ceil(len(self.itempool_pieces) * (1 + self.options.percentage_of_extra_pieces.value / 100))
         
-        self.number_of_locations = int(self.options.percentage_of_merges_that_are_checks.value / 100 * (self.npieces - 2))
+        self.number_of_locations = min(
+            int(self.options.percentage_of_merges_that_are_checks.value / 100 * (self.npieces - 2) + 1),
+            self.options.maximum_number_of_checks.value
+        )
         
         if not self.options.allow_filler_items.value:
             self.number_of_locations = min(self.number_of_locations, pieces_left)
@@ -229,9 +232,13 @@ class JigsawWorld(World):
         else:
             self.pool_pieces = []
             number_of_locations_left = self.number_of_locations
-            while number_of_locations_left > 0:
+            while number_of_locations_left > 0 and pieces_left > 0:
                 n = pieces_left / number_of_locations_left
-                if n > 5:
+                if n > 25:
+                    n = 100
+                elif n > 10:
+                    n = 25
+                elif n > 5:
                     n = 10
                 elif n > 2:
                     n = 5
@@ -239,18 +246,34 @@ class JigsawWorld(World):
                     n = 2
                 else:
                     n = 1
-                if n > 10:
-                    raise RuntimeError("[Jigsaw] Did not account for n > 2...")
+                if n > 100:
+                    raise RuntimeError("[Jigsaw] Did not account for n > 100...")
                 self.pool_pieces.append(f"{str(n) + ' ' if n > 1 else ''}Puzzle Piece{'s' if n > 1 else ''}")
                 number_of_locations_left -= 1
                 pieces_left -= n
+            if pieces_left > 0:
+                raise RuntimeError("[Jigsaw] Was not able to place all puzzle pieces...")
                 
-        for _ in self.precollected_pieces:
-            self.multiworld.push_precollected(self.create_item(f"Puzzle Piece"))
-        
+        pieces_from_start = len(self.precollected_pieces)
+            
+        while pieces_from_start > 0:
+            if pieces_from_start >= 100:
+                n = 100
+            elif pieces_from_start >= 25:
+                n = 25
+            elif pieces_from_start >= 10:
+                n = 10
+            elif pieces_from_start >= 5:
+                n = 5
+            elif pieces_from_start >= 2:
+                n = 2
+            else:
+                n = 1
+            self.multiworld.push_precollected(self.create_item(f"{str(n) + ' ' if n > 1 else ''}Puzzle Piece{'s' if n > 1 else ''}"))
+            pieces_from_start -= n
+            
         self.pool_pieces += ["Squawks"] * (self.number_of_locations - len(self.pool_pieces))
             
-
     def create_items(self):
         self.multiworld.itempool += [self.create_item(name) for name in self.pool_pieces]
 
@@ -296,6 +319,8 @@ class JigsawWorld(World):
                 + 2 * state.count("2 Puzzle Pieces", self.player) \
                 + 5 * state.count("5 Puzzle Pieces", self.player) \
                 + 10 * state.count("10 Puzzle Pieces", self.player) \
+                + 25 * state.count("25 Puzzle Pieces", self.player) \
+                + 100 * state.count("100 Puzzle Pieces", self.player) \
                 >= self.pieces_needed_per_merge[count]
             
         # Change the victory location to an event and place the Victory item there.
@@ -348,9 +373,9 @@ class JigsawWorld(World):
 
     def write_spoiler(self, spoiler_handle: TextIO) -> None:
         spoiler_handle.write(f"\nSpoiler and info for [Jigsaw] player {self.player}")
-        spoiler_handle.write(f"\nPuzzle dimension {self.nx} {self.ny}")
-        spoiler_handle.write(f"\nself.precollected_pieces {self.precollected_pieces}")
-        spoiler_handle.write(f"\nself.itempool_pieces {self.itempool_pieces}")
-        spoiler_handle.write(f"\nself.possible_merges {self.possible_merges}")
-        spoiler_handle.write(f"\nself.actual_possible_merges {self.actual_possible_merges}")
-        spoiler_handle.write(f"\nself.pieces_needed_per_merge {self.pieces_needed_per_merge}\n")
+        spoiler_handle.write(f"\nPuzzle dimension: {self.nx}×{self.ny}")
+        spoiler_handle.write(f"\nPrecollected pieces: {len(self.precollected_pieces)}")
+        # spoiler_handle.write(f"\nself.itempool_pieces {self.itempool_pieces} {len(self.itempool_pieces)}")
+        # spoiler_handle.write(f"\nself.possible_merges {self.possible_merges} {len(self.possible_merges)}")
+        # spoiler_handle.write(f"\nself.actual_possible_merges {self.actual_possible_merges}")
+        # spoiler_handle.write(f"\nself.pieces_needed_per_merge {self.pieces_needed_per_merge}\n")
