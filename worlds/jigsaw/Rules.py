@@ -22,12 +22,12 @@ def add_piece(previous_solution, piece, nx, ny):
     new_solution = []
     
     for group in previous_solution:
-        if pieces_to_merge & set(group):
+        if pieces_to_merge & group:
             merged_group.update(group)
         else:
             new_solution.append(group)
     
-    new_solution.append(list(merged_group))
+    new_solution.append(merged_group)
     return new_solution, sum(len(group) for group in new_solution) - len(new_solution)
 
 def remove_piece(previous_solution, piece, nx, ny):
