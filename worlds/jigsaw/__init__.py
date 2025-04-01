@@ -220,7 +220,7 @@ class JigsawWorld(World):
         pieces_left = math.ceil(len(self.itempool_pieces) * (1 + self.options.percentage_of_extra_pieces.value / 100))
         
         self.number_of_locations = min(
-            int(self.options.percentage_of_merges_that_are_checks.value / 100 * (self.npieces - 2) + 1),
+            int(self.options.percentage_of_merges_that_are_checks.value / 100 * (self.npieces - 2)),
             self.options.maximum_number_of_checks.value
         )
         
@@ -246,8 +246,6 @@ class JigsawWorld(World):
                     n = 2
                 else:
                     n = 1
-                if n > 100:
-                    raise RuntimeError("[Jigsaw] Did not account for n > 100...")
                 self.pool_pieces.append(f"{str(n) + ' ' if n > 1 else ''}Puzzle Piece{'s' if n > 1 else ''}")
                 number_of_locations_left -= 1
                 pieces_left -= n
@@ -314,14 +312,7 @@ class JigsawWorld(World):
         # self.possible_merges is a list, and self.possible_merges[x] is the number of merges you can make with x puzzle pieces
         for loc in board.locations:
             # loc.nmerges is the number of merges for that location. So "Merge 4 times" has nmerges equal to 4
-            loc.access_rule = lambda state, count=loc.nmerges: \
-                state.count("Puzzle Piece", self.player) \
-                + 2 * state.count("2 Puzzle Pieces", self.player) \
-                + 5 * state.count("5 Puzzle Pieces", self.player) \
-                + 10 * state.count("10 Puzzle Pieces", self.player) \
-                + 25 * state.count("25 Puzzle Pieces", self.player) \
-                + 100 * state.count("100 Puzzle Pieces", self.player) \
-                >= self.pieces_needed_per_merge[count]
+            loc.access_rule = lambda state, count=loc.nmerges: state.has("pcs", self.player, self.pieces_needed_per_merge[count])
             
         # Change the victory location to an event and place the Victory item there.
         victory_location_name = f"Merge {self.npieces - 1} times"
@@ -337,6 +328,7 @@ class JigsawWorld(World):
         menu.exits.append(connection)
         connection.connect(board)
         self.multiworld.regions += [menu, board]
+        
 
     def get_filler_item_name(self) -> str:
         return "Squawks"
@@ -345,6 +337,20 @@ class JigsawWorld(World):
         item_data = item_table[name]
         item = JigsawItem(name, item_data.classification, item_data.code, self.player)
         return item
+    
+    def collect(self, state: "CollectionState", item: "Item") -> bool:
+        change = super().collect(state, item)
+        if change and "Piece" in item.name:
+            pcs: int = int(item.name.split(' ')[0]) if item.name.split(' ')[0].isdigit() else 1
+            state.prog_items[item.player]["pcs"] += pcs
+        return change
+
+    def remove(self, state: "CollectionState", item: "Item") -> bool:
+        change = super().remove(state, item)
+        if change and "Piece" in item.name:
+            pcs: int = int(item.name.split(' ')[0]) if item.name.split(' ')[0].isdigit() else 1
+            state.prog_items[item.player]["pcs"] -= pcs
+        return change
 
     def fill_slot_data(self):
         """
