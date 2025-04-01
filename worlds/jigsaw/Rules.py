@@ -7,7 +7,7 @@ from BaseClasses import MultiWorld
 from worlds.generic.Rules import set_rule
 
 
-def add_piece(previous_solution, piece, nx, ny):
+def add_piece(previous_solution, piece, nx, ny, added_piece_count):
     pieces_to_merge = set()
     if piece <= nx * (ny - 1):
         pieces_to_merge.add(piece + nx)
@@ -28,9 +28,9 @@ def add_piece(previous_solution, piece, nx, ny):
             new_solution.append(group)
     
     new_solution.append(merged_group)
-    return new_solution, sum(len(group) for group in new_solution) - len(new_solution)
+    return new_solution, added_piece_count + 1 - len(new_solution)
 
-def remove_piece(previous_solution, piece, nx, ny):
+def remove_piece(previous_solution, piece, nx, ny, added_piece_count):
     # Find the group in previous_solution that piece is in
     group_to_remove = None
     for group in previous_solution:
@@ -39,7 +39,7 @@ def remove_piece(previous_solution, piece, nx, ny):
             break
     
     if not group_to_remove:
-        return previous_solution, sum(len(group) for group in previous_solution) - len(previous_solution)  # Piece not found in any group
+        return previous_solution, added_piece_count - len(previous_solution)  # Piece not found in any group
     
     # Remove piece from that group and then remove that group in total (but keep it in memory)
     group_to_remove.remove(piece)
@@ -47,9 +47,9 @@ def remove_piece(previous_solution, piece, nx, ny):
     
     # Re-add the remaining pieces in the removed group
     partial_solution = []
-    for remaining_piece in group_to_remove:
-        partial_solution, _ = add_piece(partial_solution, remaining_piece, nx, ny)
+    for partial_piece_count, remaining_piece in enumerate(group_to_remove):
+        partial_solution, _ = add_piece(partial_solution, remaining_piece, nx, ny, partial_piece_count)
     
     new_solution = previous_solution + partial_solution
     
-    return new_solution, sum(len(group) for group in new_solution) - len(new_solution)
+    return new_solution, added_piece_count - 1 - len(new_solution)
