@@ -22,7 +22,7 @@ def add_piece(previous_solution, piece, nx, ny):
     new_solution = []
     
     for group in previous_solution:
-        if pieces_to_merge & group:
+        if not pieces_to_merge.isdisjoint(group):
             merged_group.update(group)
         else:
             new_solution.append(group)
