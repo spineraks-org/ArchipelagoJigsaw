@@ -9,7 +9,7 @@ from .Items import JigsawItem, item_table, item_groups
 from .Locations import JigsawLocation, location_table
 
 from .Options import JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, StrictnessPieceOrder
-from .Rules import add_piece
+from .Rules import add_piece, get_merges_from_adding_piece
 
 
 class JigsawWeb(WebWorld):
@@ -159,7 +159,7 @@ class JigsawWorld(World):
                     elif self.options.piece_order == PieceOrder.option_every_piece_fits:
                         for i in range(len(pieces)):
                             p = pieces[i]
-                            c, m = add_piece(clusters, p, self.nx, self.ny, added_piece_count)
+                            m = get_merges_from_adding_piece(clusters, p, self.nx, self.ny, added_piece_count)
                             if first_piece or m > merges:
                                 pieces.remove(p)
                                 break
@@ -171,7 +171,7 @@ class JigsawWorld(World):
                         best_result = 5
                         for i in range(len(pieces)):
                             p = pieces[i]
-                            c, m = add_piece(clusters, p, self.nx, self.ny, added_piece_count)
+                            m = get_merges_from_adding_piece(clusters, p, self.nx, self.ny, added_piece_count)
                             if first_piece or m - merges <= best_result_ever:
                                 best_piece = p
                                 best_result = 0

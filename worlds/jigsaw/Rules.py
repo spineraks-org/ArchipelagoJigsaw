@@ -30,6 +30,29 @@ def add_piece(previous_solution, piece, nx, ny, added_piece_count):
     new_solution.append(merged_group)
     return new_solution, added_piece_count + 1 - len(new_solution)
 
+
+def get_merges_from_adding_piece(previous_solution, piece, nx, ny, added_piece_count):
+    """add_piece, but without creating a new solution for better performance when a new solution is not needed."""
+    pieces_to_merge = set()
+    if piece <= nx * (ny - 1):
+        pieces_to_merge.add(piece + nx)
+    if piece > nx:
+        pieces_to_merge.add(piece - nx)
+    if piece % nx != 1:
+        pieces_to_merge.add(piece - 1)
+    if piece % nx != 0:
+        pieces_to_merge.add(piece + 1)
+
+    # Every group that does not intersect with `pieces_to_merge` will be a group in the new solution.
+    # Every group that does intersect with `pieces_to_merge` will merge with `pieces_to_merge` to become a single group
+    # in the new solution.
+    # Iterating `previous_solution` and counting the number of groups is a hot loop. `sum` and `map` allow for both to
+    # be performed in optimised C code. Only binding `pieces_to_merge.isdisjoint` once also helps a bit with
+    # performance.
+    new_solution_length = 1 + sum(map(pieces_to_merge.isdisjoint, previous_solution))
+    return added_piece_count + 1 - new_solution_length
+
+
 def remove_piece(previous_solution, piece, nx, ny, added_piece_count):
     # Find the group in previous_solution that piece is in
     group_to_remove = None
