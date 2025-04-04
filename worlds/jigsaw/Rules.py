@@ -156,3 +156,34 @@ class PuzzleBoard:
         found_clusters = {board[connection] for connection in self.adjacent_pieces[piece_idx]}
         # Empty spaces on the board are set to `None`.
         return len(found_clusters) - 1 if None in found_clusters else len(found_clusters)
+
+    def remove_piece(self, piece_idx: int):
+        """
+        Remove a piece from the board.
+
+        This is more expensive than adding pieces and is more expensive the larger the group that the removed piece is
+        in.
+        """
+        board = self.board
+        cluster_id = board[piece_idx]
+        assert cluster_id is not None, "Attempted to remove a piece that is not present in the board"
+        # Remove the cluster this piece is in.
+        pieces_in_cluster = self.clusters.pop(cluster_id)
+        # The cluster ID is now unused, so give it back to the board.
+        self._unused_ids.append(cluster_id)
+
+        # Clear the space on the board where the cluster was
+        for i in pieces_in_cluster:
+            board[i] = None
+
+        # Remove the piece that has been removed from the board.
+        pieces_in_cluster.remove(piece_idx)
+
+        # Reduce the total merges by the merges of the real cluster.
+        # Note that `piece_idx` has already been removed from `pieces_in_cluster`.
+        self.merges_count -= len(pieces_in_cluster)
+
+        # Add all the pieces back on, besides the removed piece.
+        add_piece = self.add_piece
+        for i in pieces_in_cluster:
+            add_piece(i)
