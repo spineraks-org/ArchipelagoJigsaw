@@ -92,6 +92,7 @@ class PuzzleBoard:
         The behavior of attempting to add a piece which is already present in the board is undefined.
         """
         board = self.board
+        assert board[piece_index] is None, "Attempted to add a piece already present in the board"
 
         # Get all adjacent cluster IDs.
         # Use incorrect typing to begin with because it is more efficient to remove `None` this way.
@@ -158,6 +159,7 @@ class PuzzleBoard:
         """
         # Get all adjacent cluster IDs.
         board = self.board
+        assert board[piece_idx] is None, "Attempted to get the merges for adding a piece already present in the board"
         found_clusters = {board[connection] for connection in self.adjacent_pieces[piece_idx]}
         # Empty spaces on the board are set to `None`.
         return len(found_clusters) - 1 if None in found_clusters else len(found_clusters)
