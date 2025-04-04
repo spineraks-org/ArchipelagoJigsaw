@@ -57,11 +57,7 @@ class PuzzleBoard:
     This means that other operations that need to check what group a piece is in need to get the group ID as stored on
     the board, but then look up the real group ID with `real_group_id = group_to_real_group[group_id_from_board]`.
     """
-    __slots__ = ("width", "board", "adjacent_pieces", "merges_count", "group_to_real_group", "real_group_to_groups",
-                 "_unused_ids")
 
-    # The width of the puzzle board.
-    width: int
     # The puzzle board itself. A 1D list used to represent a 2D board.
     board: list[int | None]
     # A lookup of the adjacent pieces of each piece, used like a dict[int, tuple[int, ...]].
@@ -77,10 +73,11 @@ class PuzzleBoard:
     _unused_ids: list[int]
 
     def __init__(self, width: int, height: int):
-        self.width = width
-
         pieces = range(width * height)
-        self._unused_ids = list(pieces)
+        # The maximum number of IDs that could be needed is the maximum number of isolated pieces possible, which is
+        # half the number of spaces on the board when even, or half the number of spaces plus 1 when odd.
+        max_isolated_pieces = len(pieces) // 2 + len(pieces) % 2
+        self._unused_ids = list(range(max_isolated_pieces))
         self.board = [None] * len(pieces)
 
         # Pre-calculate the pieces that are adjacent to each piece.
@@ -119,7 +116,7 @@ class PuzzleBoard:
 
         num_adjacent_groups = len(found_groups)
         if num_adjacent_groups == 0:
-            # Loose piece, give it a new ID
+            # Isolated piece, give it a new ID
             new_id = self._unused_ids.pop()
             board[piece_index] = new_id
             self.group_to_real_group[new_id] = new_id
