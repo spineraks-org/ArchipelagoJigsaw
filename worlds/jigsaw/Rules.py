@@ -150,7 +150,12 @@ class PuzzleBoard:
                     board[piece_idx] = largest_cluster_id
 
     def get_merges_from_adding_piece(self, piece_idx: int):
-        """Get the number of merges that would be made by adding a piece."""
+        """
+        Get the number of merges that would be made by adding a piece.
+
+        The behavior of attempting to get the number of merges from adding a piece which is already present in the board
+        is undefined.
+        """
         # Get all adjacent cluster IDs.
         board = self.board
         found_clusters = {board[connection] for connection in self.adjacent_pieces[piece_idx]}
