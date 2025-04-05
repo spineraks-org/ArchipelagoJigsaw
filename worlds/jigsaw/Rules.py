@@ -11,8 +11,8 @@ class PuzzleBoard:
     """
     Puzzle board implementation.
 
-    Optimized for efficient adding pieces to the board and calculating the number of new merges that would be made when
-    adding a piece.
+    Optimized for efficiently adding pieces to the board and calculating the number of new merges that would be made
+    when adding a piece.
 
     A board stores a cluster ID value for each piece placed on the board, where `None` indicates an empty space on the
     board.
@@ -23,7 +23,8 @@ class PuzzleBoard:
 
     Piece placement behaviours:
     A)
-    A newly placed piece that does not connect to any existing placed pieces is given a new unique cluster ID.
+    A newly placed piece that does not connect to any existing placed pieces is given a new unique cluster ID and is
+    added to a new cluster that is given that ID.
     _0____3_
     ____4_3_
     __1_____
@@ -38,8 +39,9 @@ class PuzzleBoard:
 
     C)
     When a piece is placed that would connect to multiple existing clusters of pieces, the largest of the clusters is
-    found and all pieces in the smaller clusters are added to the largest cluster.
-    The cluster IDs of the smaller clusters can then be re-used later on.
+    found and all pieces in the smaller clusters are added into the largest cluster.
+    The cluster IDs of the smaller clusters are then returned to the board's list of unique cluster IDs, to be re-used
+    later on for new clusters.
     _0____3_     _0____3_
     ____4_33     ____4_33
     __1____X <-- __1____3 <--
@@ -61,7 +63,13 @@ class PuzzleBoard:
     def __init__(self, width: int, height: int):
         pieces = range(width * height)
         # The maximum number of IDs that could be needed is the maximum number of isolated pieces possible, which is
-        # half the number of spaces on the board when even, or half the number of spaces plus 1 when odd.
+        # half the number of spaces on the board when even, or half one-more-than-the-number-of-spaces when odd.
+        #                   X_X_X
+        #      X_X_  X_X_X  _X_X_
+        # X_X  _X_X  _X_X_  X_X_X
+        # _X_  X_X_  X_X_X  _X_X_
+        # X_X  _X_X  _X_X_  X_X_X
+        # 5/9  8/16  10/20  13/25
         max_isolated_pieces = len(pieces) // 2 + len(pieces) % 2
         self._unused_ids = list(range(max_isolated_pieces))
         self.board = [None] * len(pieces)
@@ -89,44 +97,48 @@ class PuzzleBoard:
         """
         Add a piece to the board.
 
-        The behavior of attempting to add a piece which is already present in the board is undefined.
+        The behavior of attempting to add a piece which is already present on the board is undefined.
         """
         board = self.board
-        assert board[piece_index] is None, "Attempted to add a piece already present in the board"
+        assert board[piece_index] is None, "Attempted to add a piece already present on the board"
 
         # Get all adjacent cluster IDs.
         # Use incorrect typing to begin with because it is more efficient to remove `None` this way.
-        found_clusters: set[int] = {board[connection] for connection in self.adjacent_pieces[piece_index]}  # type: ignore
+        adjacent_clusters: set[int] = {board[adjacent_piece] for adjacent_piece in self.adjacent_pieces[piece_index]}  # type: ignore
         # Empty spaces on the board are set to `None`.
-        found_clusters.discard(None)  # type: ignore
+        adjacent_clusters.discard(None)  # type: ignore
 
-        num_adjacent_clusters = len(found_clusters)
+        num_adjacent_clusters = len(adjacent_clusters)
         if num_adjacent_clusters == 0:
-            # Isolated piece, give it a new ID
-            new_id = self._unused_ids.pop()
-            board[piece_index] = new_id
-            self.clusters[new_id] = [piece_index]
+            # The new piece is isolated, add it to a new cluster.
+            new_cluster_id = self._unused_ids.pop()
+            board[piece_index] = new_cluster_id
+            self.clusters[new_cluster_id] = [piece_index]
         elif num_adjacent_clusters == 1:
-            # Only one connecting cluster
+            # The new piece is adjacent to only one cluster, add it to that cluster.
             self.merges_count += 1
-            found_cluster = next(iter(found_clusters))
+            found_cluster = next(iter(adjacent_clusters))
             board[piece_index] = found_cluster
             self.clusters[found_cluster].append(piece_index)
         else:
-            # Multiple connecting clusters
+            # The new piece is adjacent to multiple clusters, add it to the largest cluster and move all pieces in the
+            # other clusters into the largest cluster.
             self.merges_count += num_adjacent_clusters
             clusters = self.clusters
 
-            clusters_iter = iter(found_clusters)
-
+            # Find the largest of the clusters.
+            # Get the first cluster and set it as the current largest.
+            clusters_iter = iter(adjacent_clusters)
             first_cluster_id: int = next(clusters_iter)
             pieces_in_cluster = clusters[first_cluster_id]
+            # The clusters and their IDs need to be looped through again once the largest cluster has been determined,
+            # so a list is created to skip having to get the clusters a second time.
             clusters_and_ids = [(first_cluster_id, pieces_in_cluster)]
-
-            # Find the largest of the clusters
+            # Initialise variables for storing the largest cluster.
             largest_cluster_id = first_cluster_id
             largest_pieces_in_cluster = pieces_in_cluster
             largest_cluster_size = len(pieces_in_cluster)
+            # Iterate through the remaining clusters.
             for cluster_id in clusters_iter:
                 pieces_in_cluster = clusters[cluster_id]
                 cluster_size = len(pieces_in_cluster)
@@ -136,6 +148,7 @@ class PuzzleBoard:
                     largest_cluster_id = cluster_id
                     largest_pieces_in_cluster = pieces_in_cluster
 
+            # Add the new piece to the largest cluster and write cluster ID onto the board for the new piece.
             board[piece_index] = largest_cluster_id
             largest_pieces_in_cluster.append(piece_index)
 
@@ -145,12 +158,15 @@ class PuzzleBoard:
                 if pieces_in_cluster is largest_pieces_in_cluster:
                     continue
                 largest_pieces_in_cluster.extend(pieces_in_cluster)
+                # Remove the cluster from the board's clusters.
                 del clusters[cluster_id]
+                # Release the cluster's ID back to the board.
                 unused_ids.append(cluster_id)
+                # Write the new cluster ID onto the board for each piece.
                 for piece_idx in pieces_in_cluster:
                     board[piece_idx] = largest_cluster_id
 
-    def get_merges_from_adding_piece(self, piece_idx: int):
+    def get_merges_from_adding_piece(self, piece_index: int):
         """
         Get the number of merges that would be made by adding a piece.
 
@@ -159,35 +175,35 @@ class PuzzleBoard:
         """
         # Get all adjacent cluster IDs.
         board = self.board
-        assert board[piece_idx] is None, "Attempted to get the merges for adding a piece already present in the board"
-        found_clusters = {board[connection] for connection in self.adjacent_pieces[piece_idx]}
-        # Empty spaces on the board are set to `None`.
-        return len(found_clusters) - 1 if None in found_clusters else len(found_clusters)
+        assert board[piece_index] is None, "Attempted to get the merges for adding a piece already present on the board"
+        found_cluster_ids = {board[connection] for connection in self.adjacent_pieces[piece_index]}
+        # Empty spaces on the board are set to `None`, so don't count `None` when counting the number of clusters.
+        return len(found_cluster_ids) - 1 if None in found_cluster_ids else len(found_cluster_ids)
 
-    def remove_piece(self, piece_idx: int):
+    def remove_piece(self, piece_index: int):
         """
         Remove a piece from the board.
 
-        This is more expensive than adding pieces and is more expensive the larger the group that the removed piece is
-        in.
+        This is more expensive than adding pieces and is more expensive the larger the cluster that the removed piece
+        was part of.
         """
         board = self.board
-        cluster_id = board[piece_idx]
-        assert cluster_id is not None, "Attempted to remove a piece that is not present in the board"
+        cluster_id = board[piece_index]
+        assert cluster_id is not None, "Attempted to remove a piece that is not present on the board"
         # Remove the cluster this piece is in.
         pieces_in_cluster = self.clusters.pop(cluster_id)
         # The cluster ID is now unused, so give it back to the board.
         self._unused_ids.append(cluster_id)
 
-        # Clear the space on the board where the cluster was
+        # Clear the space on the board where the cluster was.
         for i in pieces_in_cluster:
             board[i] = None
 
-        # Remove the piece that has been removed from the board.
-        pieces_in_cluster.remove(piece_idx)
+        # Remove the piece, that has been removed from the board, from the list.
+        pieces_in_cluster.remove(piece_index)
 
         # Reduce the total merges by the merges of the real cluster.
-        # Note that `piece_idx` has already been removed from `pieces_in_cluster`.
+        # Note that `piece_index` has already been removed from `pieces_in_cluster`.
         self.merges_count -= len(pieces_in_cluster)
 
         # Add all the pieces back on, besides the removed piece.
