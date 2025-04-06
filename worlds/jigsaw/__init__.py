@@ -9,7 +9,7 @@ from .Items import JigsawItem, item_table, item_groups
 from .Locations import JigsawLocation, location_table
 
 from .Options import JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, StrictnessPieceOrder
-from .Rules import add_piece
+from .Rules import PuzzleBoard
 
 
 class JigsawWeb(WebWorld):
@@ -136,8 +136,7 @@ class JigsawWorld(World):
         for pieces in pieces_groups:
             self.multiworld.random.shuffle(pieces)
         
-        merges = 0
-        clusters = []
+        board = PuzzleBoard(self.nx, self.ny)
         
         self.precollected_pieces = []
         self.itempool_pieces = []
@@ -156,10 +155,9 @@ class JigsawWorld(World):
                         p = pieces.pop(0)
                     
                     elif self.options.piece_order == PieceOrder.option_every_piece_fits:
-                        for i in range(len(pieces)):
-                            p = pieces[i]
-                            c, m = add_piece(clusters, p, self.nx, self.ny)
-                            if first_piece or m > merges:
+                        for p in pieces:
+                            m = board.get_merges_from_adding_piece(p - 1)
+                            if first_piece or m > 0:
                                 pieces.remove(p)
                                 break
                         else:
@@ -168,16 +166,16 @@ class JigsawWorld(World):
                     elif self.options.piece_order == PieceOrder.option_least_merges_possible:
                         best_piece = None
                         best_result = 5
-                        for i in range(len(pieces)):
-                            p = pieces[i]
-                            c, m = add_piece(clusters, p, self.nx, self.ny)
-                            if first_piece or m - merges <= best_result_ever:
+                        # This is a hot loop, so the code within it needs to be as performant as possible.
+                        for p in pieces:
+                            m = board.get_merges_from_adding_piece(p - 1)
+                            if first_piece or m <= best_result_ever:
                                 best_piece = p
                                 best_result = 0
                                 break
-                            if m - merges < best_result:
+                            if m < best_result:
                                 best_piece = p
-                                best_result = m - merges
+                                best_result = m
                                 
                         p = best_piece
                         best_result_ever = best_result
@@ -187,26 +185,27 @@ class JigsawWorld(World):
                     raise RuntimeError("Jigsaw: No piece selected")
                 
                 # if you have merges left to unlock pieces
-                if merges > len(self.itempool_pieces) + self.options.number_of_checks_out_of_logic.value:
+                if board.merges_count > len(self.itempool_pieces) + self.options.number_of_checks_out_of_logic.value:
                     self.itempool_pieces.append(p)  # add piece to itempool. The order in this is the order you'll get pcs
                 else:
                     self.precollected_pieces.append(p)  # if no merges left, add piece to start_inventory
-                    
-                clusters, merges = add_piece(clusters, p, self.nx, self.ny)  # update number of merges left
+
+                board.add_piece(p - 1)
                 
                 first_piece = False
                     
         self.possible_merges = [- self.options.number_of_checks_out_of_logic.value]
         self.actual_possible_merges = [0]
-        merges = 0
-        clusters = []
+        board = PuzzleBoard(self.nx, self.ny)
         
         for p in self.precollected_pieces:
-            clusters, merges = add_piece(clusters, p, self.nx, self.ny)
+            board.add_piece(p - 1)
+            merges = board.merges_count
             self.possible_merges.append(merges - self.options.number_of_checks_out_of_logic.value) 
             self.actual_possible_merges.append(merges)
         for c, p in enumerate(self.itempool_pieces):
-            clusters, merges = add_piece(clusters, p, self.nx, self.ny)
+            board.add_piece(p - 1)
+            merges = board.merges_count
             if len(self.itempool_pieces) - c < 10:
                 self.possible_merges.append(merges)   
             else:
