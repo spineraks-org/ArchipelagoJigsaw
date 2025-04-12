@@ -23,7 +23,8 @@ class AllowFillerItems(Toggle):
     
 class PercentageOfMergesThatAreChecks(Range):
     """
-    This option affects the number of checks that are in the pool.
+    This option affects the number of checks and items that are *in the pool*.
+    (Note: every merge will be a check, but checks not "in the pool" will be a local filler item). 
     100 means every merge will be a check. So with 500 merges, there will be 500 checks.
     10 means 10% of all merges will result in a check. If you have 500 merges, there will be 50 checks.
     If you have selected fewer checks, items like "5 Puzzle Pieces" will be shuffled into the pool.
@@ -39,7 +40,7 @@ class MaximumNumberOfChecks(Range):
     """
     The pool can be filled with puzzle pieces really quickly. 
     When there are hundred of puzzle pieces in the pool, it really changes the dynamics in multiworlds.
-    As such, by default, there are at most 100 checks and items for Jigsaw.
+    As such, by default, there are at most 100 checks and items *in the pool* for Jigsaw.
     If you choose a larger puzzle, you will receive multiple pieces at once.
     This setting overrides the previous option.
     """
