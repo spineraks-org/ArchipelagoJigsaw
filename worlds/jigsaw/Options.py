@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, PerGameCommonOptions, Range, Toggle
+from Options import Choice, PerGameCommonOptions, Range, Toggle, Visibility
 
 class NumberOfPieces(Range):
     """
@@ -8,18 +8,17 @@ class NumberOfPieces(Range):
     """
 
     display_name = "Number of pieces"
-    range_start = 25
-    range_end = 1000
+    range_start = 4
+    range_end = 2000
     default = 25
     
 class AllowFillerItems(Toggle):
     """
-    If this option is enabled, the pool will contain several Squawks.
-    Squawks is the green-feathered parrot that helps Donkey Kong find puzzle pieces, but in this game they're useless.
-    If this option is disabled, no filler items will be in the pool and every item will be one or more puzzle pieces.
+    This option doesn't do anything anymore, but I've kept it for backwards compatibility.
     """
 
     display_name = "Allow filler item"
+    visibility = Visibility.none
     default = False
     
 class PercentageOfMergesThatAreChecks(Range):
@@ -47,7 +46,7 @@ class MaximumNumberOfChecks(Range):
     
     display_name = "Maximum number of checks"
     range_start = 25
-    range_end = 1000
+    range_end = 2000
     default = 100
     
 class OrientationOfImage(Choice):
@@ -71,7 +70,7 @@ class WhichImage(Range):
     
     display_name = "Which image"
     range_start = 1
-    range_end = 16
+    range_end = 39
     default = "random"
     
 class PercentageOfExtraPieces(Range):
@@ -158,7 +157,7 @@ class NumberOfChecksOutOfLogic(Range):
 class JigsawOptions(PerGameCommonOptions):
     number_of_pieces: NumberOfPieces
     orientation_of_image: OrientationOfImage
-    allow_filler_items: AllowFillerItems
+    allow_filler_items: AllowFillerItems  # not used anymore
     percentage_of_merges_that_are_checks: PercentageOfMergesThatAreChecks
     maximum_number_of_checks: MaximumNumberOfChecks
     which_image: WhichImage

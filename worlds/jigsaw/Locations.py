@@ -14,4 +14,4 @@ class JigsawLocation(Location):
         super().__init__(player, name, address, parent)
         self.nmerges = nmerges
 
-location_table = {f"Merge {i} times": LocData(234782000 + i, "Board") for i in range(1, 1601)}
+location_table = {f"Merge {i} times": LocData(234782000 + i, "Board") for i in range(1, 2501)}
