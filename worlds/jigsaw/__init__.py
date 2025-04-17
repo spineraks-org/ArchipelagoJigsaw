@@ -229,7 +229,7 @@ class JigsawWorld(World):
         pieces_left = math.ceil(len(self.itempool_pieces) * (1 + self.options.percentage_of_extra_pieces.value / 100))
         
         self.number_of_locations = min(
-            int(self.options.percentage_of_merges_that_are_checks.value / 100 * (self.npieces - 2)) + 1,
+            int(self.options.percentage_of_merges_that_are_checks.value / 100 * (self.npieces - 2)),
             self.options.maximum_number_of_checks.value
         )
             
