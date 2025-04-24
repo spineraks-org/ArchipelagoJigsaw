@@ -52,7 +52,7 @@ class JigsawWorld(World):
     
     item_name_groups = item_groups
     
-    ap_world_version = "0.5.0"
+    ap_world_version = "0.6.0"
 
     def _get_jigsaw_data(self):
         return {
@@ -364,7 +364,6 @@ class JigsawWorld(World):
             # Generate a list of filler_locations random samples from the list encouragements
             filler_encouragements = self.multiworld.random.choices(encouragements, k=len(filler_locations))
         
-        print(item_locations, filler_locations)
         board.locations = all_locations
 
         # self.possible_merges is a list, and self.possible_merges[x] is the number of merges you can make with x puzzle pieces
@@ -421,6 +420,9 @@ class JigsawWorld(World):
         slot_data = self._get_jigsaw_data()
         jigsaw_options = self.options.as_dict(
             "which_image",
+            "rotations",
+            "enable_clues",
+            "total_size_of_image",
         )
         slot_data = {**slot_data, **jigsaw_options}  # combine the two
         

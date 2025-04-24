@@ -170,10 +170,42 @@ class PermillageOfChecksOutOfLogic(Range):
     range_end = 100
     default = 5
 
+class Rotations(Choice):
+    """
+    Something to make it more realistic but also much harder: pieces can be rotated!
+    """
+
+    display_name = "Rotations"
+    option_no_rotation = 0
+    option_per_90_degrees = 90
+    option_per_180_degrees = 180
+    default = 0
+    
+class EnableClues(Toggle):
+    """
+    Enable clues for the jigsaw puzzle, which shows the outline of pieces that can merge.
+    If enabled, can be used as many times as you want.
+    If disabled, the button is simply not there.
+    """
+
+    display_name = "Enable clues"
+    default = True
+    
+class TotalSizeOfImage(Range):
+    """
+    The percentage of your game that makes up the image and the puzzle. Default should be fine,
+    but you can change it if you want to make it smaller or bigger.
+    """
+
+    display_name = "Total size of image"
+    range_start = 30
+    range_end = 100
+    default = 85
 
 @dataclass
 class JigsawOptions(PerGameCommonOptions):
     number_of_pieces: NumberOfPieces
+    rotations: Rotations
     percentage_of_extra_pieces: PercentageOfExtraPieces
     maximum_number_of_real_items: MaximumNumberOfRealItems
     minimum_number_of_pieces_per_real_item: MinimumNumberOfPiecesPerRealItem
@@ -185,12 +217,27 @@ class JigsawOptions(PerGameCommonOptions):
     strictness_piece_order_type: StrictnessPieceTypeOrder
     piece_order: PieceOrder
     strictness_piece_order: StrictnessPieceOrder
+    enable_clues: EnableClues
+    total_size_of_image: TotalSizeOfImage
     
 jigsaw_option_groups = [
     OptionGroup(
-        "Pieces, items and checks",
+        "Important: gameplay options",
         [
             NumberOfPieces,
+            Rotations,
+        ],
+    ),
+    OptionGroup(
+        "Important: image", 
+        [
+            OrientationOfImage,
+            WhichImage, 
+        ],
+    ),
+    OptionGroup(
+        "Optional: extra pieces, items and checks",
+        [
             PercentageOfExtraPieces,
             MaximumNumberOfRealItems,
             MinimumNumberOfPiecesPerRealItem,
@@ -199,19 +246,19 @@ jigsaw_option_groups = [
         ],
     ),
     OptionGroup(
-        "Image", 
-        [
-            OrientationOfImage,
-            WhichImage, 
-        ],
-    ),
-    OptionGroup(
-        "Piece order", 
+        "Optional: piece order", 
         [
             PieceTypeOrder,
             StrictnessPieceTypeOrder,
             PieceOrder,
             StrictnessPieceOrder
+        ],
+    ),
+    OptionGroup(
+        "Optional: others", 
+        [
+            EnableClues,
+            TotalSizeOfImage,
         ],
     ),
 ]
