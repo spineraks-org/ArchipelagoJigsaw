@@ -24,6 +24,9 @@ item_table = {
     for i in range(1, 501)
 }
 
+item_table["1 Fake Puzzle Piece"] = ItemData(234785000 + (1 - 1), ItemClassification.trap)
+
+
 encouragements = [
     "Good job!", "Wowza!", "You rock!", "Nailed it!", "Heck yes!",
     "Bravo!", "Go you!", "Yayyy!", "Woohoo!", "So cool!",

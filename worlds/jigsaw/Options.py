@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, PerGameCommonOptions, Range, Toggle, OptionGroup
+from Options import Choice, PerGameCommonOptions, Range, Toggle, OptionGroup, Visibility
 
 class NumberOfPieces(Range):
     """
@@ -46,15 +46,41 @@ class MinimumNumberOfPiecesPerRealItem(Range):
     range_end = 100
     default = 1
     
-class EnableForcedLocalFillerItems(Toggle):
+class PlacementOfFillers(Choice):
     """
-    This option adds forced local filler items to your game so every merge is a check.
-    Disabling these local filler items has no influence on the multiworld at all, since only local checks are removed.
-    I see no reason to turn this off, except when a host is adament that you limit the number of checks.
+    This option determines if and how filler items are used. Default is probably fine :)
+    
+    local_only: 
+    Creates filler items so every merge is a check, but they are not shuffled across the multiworld.
+    Probably ideal: doesn't overload the pool with filler items, but still gives dopamine rush every time you merge.
+    
+    global: creates filler items so every merge is a check, and they are shuffled across the multiworld.
+    Warning: use this carefully, as this may overload other games with useless filler items.
+    You can use the invisible percentage_of_fillers_in_itempool option to change the percentage of fillers in the itempool. 
+    Default is 100%. So for example if you want 60%: 
+      percentage_of_fillers_globally:
+        60: 50
+    
+    none: no filler items are added to the itempool.
     """
     
-    display_name = "Enable forced local filler items"
-    default = True
+    display_name = "Forced local filler items"
+    option_local_only = 1
+    option_global = 2
+    option_none = 3
+    default = 1
+    
+class PercentageOfFillersGlobally(Range):
+    """
+    If you selected "add_fillers_to_itempool" in the above option, 
+    this option will determine what percentage of fillers are added to the itempool.
+    """
+    
+    visibility = Visibility.none
+    display_name = "Percentage of filler items in itempool"
+    range_start = 0
+    range_end = 100
+    default = 100
 
     
 class OrientationOfImage(Choice):
@@ -78,7 +104,7 @@ class WhichImage(Range):
     
     display_name = "Which image"
     range_start = 1
-    range_end = 40
+    range_end = 48
     default = "random"
     
 class PercentageOfExtraPieces(Range):
@@ -100,7 +126,7 @@ class PieceTypeOrder(Choice):
     This option affects the order in which you receive puzzle piece types (corners, edges, normal).
     This is prioritized over the Piece Order option.
     
-    four_parts:
+    four_parts and four_parts_non_rotated:
     The board will be divided into four (rotated) quadrants.
     You will first get all pieces of one of the first quadrant, then for the second, etc.
     This makes it so that you're basically starting and finishing a section four times in your playthrough.
@@ -116,6 +142,7 @@ class PieceTypeOrder(Choice):
     option_normal_corners_edges = 6
     option_edges_corners_normal = 7
     option_four_parts = 8
+    option_four_parts_non_rotated = 9
     default = 1
     
 class StrictnessPieceTypeOrder(Range): 
@@ -181,6 +208,17 @@ class Rotations(Choice):
     option_per_180_degrees = 180
     default = 0
     
+class FakePieces(Range):
+    """
+    Adds a fake piece to start with and adds a fake piece to the itempool.
+    Surely I can turn this on by default for those that don't carefully inspect the options, right?
+    """
+
+    display_name = "Fake pieces"
+    range_start = 0
+    range_end = 1
+    default = 1
+    
 class EnableClues(Toggle):
     """
     Enable clues for the jigsaw puzzle, which shows the outline of pieces that can merge.
@@ -209,7 +247,8 @@ class JigsawOptions(PerGameCommonOptions):
     percentage_of_extra_pieces: PercentageOfExtraPieces
     maximum_number_of_real_items: MaximumNumberOfRealItems
     minimum_number_of_pieces_per_real_item: MinimumNumberOfPiecesPerRealItem
-    enable_forced_local_filler_items: EnableForcedLocalFillerItems
+    placement_of_fillers: PlacementOfFillers
+    percentage_of_fillers_globally: PercentageOfFillersGlobally
     permillage_of_checks_out_of_logic: PermillageOfChecksOutOfLogic
     orientation_of_image: OrientationOfImage
     which_image: WhichImage
@@ -219,6 +258,7 @@ class JigsawOptions(PerGameCommonOptions):
     strictness_piece_order: StrictnessPieceOrder
     enable_clues: EnableClues
     total_size_of_image: TotalSizeOfImage
+    fake_pieces: FakePieces
     
 jigsaw_option_groups = [
     OptionGroup(
@@ -241,7 +281,8 @@ jigsaw_option_groups = [
             PercentageOfExtraPieces,
             MaximumNumberOfRealItems,
             MinimumNumberOfPiecesPerRealItem,
-            EnableForcedLocalFillerItems,
+            PlacementOfFillers,
+            PercentageOfFillersGlobally,
             PermillageOfChecksOutOfLogic,
         ],
     ),
@@ -258,6 +299,7 @@ jigsaw_option_groups = [
         "Optional: others", 
         [
             EnableClues,
+            FakePieces,
             TotalSizeOfImage,
         ],
     ),
