@@ -292,7 +292,7 @@ jigsaw_option_groups = [
             PieceTypeOrder,
             StrictnessPieceTypeOrder,
             PieceOrder,
-            StrictnessPieceOrder
+            StrictnessPieceOrder,
         ],
     ),
     OptionGroup(

@@ -297,6 +297,8 @@ class JigsawWorld(World):
         if self.options.fake_pieces.value == 1:
             self.multiworld.push_precollected(self.create_item(f"1 Fake Puzzle Piece"))
             self.fake_pieces_mimic = self.multiworld.random.choices([i+1 for i in range(self.npieces)], k=2)
+        else:
+            self.fake_pieces_mimic = []
             
             
     def create_items(self):
