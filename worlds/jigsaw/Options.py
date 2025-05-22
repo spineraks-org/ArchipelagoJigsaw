@@ -113,7 +113,7 @@ class WhichImage(Range):
     
     display_name = "Which image"
     range_start = 1
-    range_end = 48
+    range_end = 49
     default = "random"
     
 class PercentageOfExtraPieces(Range):
