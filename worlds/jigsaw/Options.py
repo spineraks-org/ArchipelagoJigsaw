@@ -70,6 +70,15 @@ class PlacementOfFillers(Choice):
     option_none = 3
     default = 1
     
+    
+class EnableForcedLocalFillerItems(Toggle):
+    """
+    Old option, overrides PlacementOfFillers
+    """
+    Visibility = Visibility.none
+    display_name = "Enable forced local filler items"
+    default = True
+    
 class PercentageOfFillersGlobally(Range):
     """
     If you selected "add_fillers_to_itempool" in the above option, 
@@ -248,6 +257,7 @@ class JigsawOptions(PerGameCommonOptions):
     maximum_number_of_real_items: MaximumNumberOfRealItems
     minimum_number_of_pieces_per_real_item: MinimumNumberOfPiecesPerRealItem
     placement_of_fillers: PlacementOfFillers
+    enable_forced_local_filler_items: EnableForcedLocalFillerItems
     percentage_of_fillers_globally: PercentageOfFillersGlobally
     permillage_of_checks_out_of_logic: PermillageOfChecksOutOfLogic
     orientation_of_image: OrientationOfImage
