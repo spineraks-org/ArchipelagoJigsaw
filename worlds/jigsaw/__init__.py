@@ -52,7 +52,7 @@ class JigsawWorld(World):
     
     item_name_groups = item_groups
     
-    ap_world_version = "0.6.2"
+    ap_world_version = "0.6.3"
 
     def _get_jigsaw_data(self):
         return {
@@ -103,11 +103,10 @@ class JigsawWorld(World):
         self.nx, self.ny = self.calculate_optimal_nx_and_ny(self.options.number_of_pieces.value, self.orientation)
         self.npieces = self.nx * self.ny
         
-        
         if self.options.piece_order_type == PieceTypeOrder.option_random_order:
             pieces_groups = [[i for i in range(1, self.npieces + 1)]]
             self.random.shuffle(pieces_groups[0])
-        elif self.options.piece_order_type == PieceTypeOrder.option_four_parts or PieceTypeOrder.option_four_parts_non_rotated:
+        elif self.options.piece_order_type == PieceTypeOrder.option_four_parts or self.options.piece_order_type == PieceTypeOrder.option_four_parts_non_rotated:
             # Generate a random angle alpha for rotation
             alpha = 0
             if self.options.piece_order_type == PieceTypeOrder.option_four_parts: 
@@ -179,7 +178,7 @@ class JigsawWorld(World):
             # Move a percentage of pieces from each group to the previous group
             for i in range(len(pieces_groups) - 1, 0, -1):
                 move_percentage(pieces_groups[i], pieces_groups[i - 1], move_pieces)
-            for i in range(len(pieces_groups)):
+            for i in range(len(pieces_groups) - 1):
                 move_percentage(pieces_groups[i], pieces_groups[i + 1], move_pieces)
         
         for pieces in pieces_groups:
