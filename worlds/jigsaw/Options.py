@@ -219,14 +219,13 @@ class Rotations(Choice):
     
 class FakePieces(Range):
     """
-    Adds a fake piece to start with and adds a fake piece to the itempool.
-    Surely I can turn this on by default for those that don't carefully inspect the options, right?
+    Adds a fake piece to start with and adds a fake piece to the itempool. Just for fun!
     """
 
     display_name = "Fake pieces"
     range_start = 0
     range_end = 1
-    default = 1
+    default = 0
     
 class EnableClues(Toggle):
     """
