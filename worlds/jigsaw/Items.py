@@ -25,7 +25,8 @@ item_table = {
 }
 
 item_table["1 Fake Puzzle Piece"] = ItemData(234785000 + (1 - 1), ItemClassification.trap)
-
+item_table["Rotate Trap"] = ItemData(234786000 + (1 - 1), ItemClassification.trap)
+item_table["Swap Trap"] = ItemData(234787000 + (1 - 1), ItemClassification.trap)
 
 encouragements = [
     "Good job!", "Wowza!", "You rock!", "Nailed it!", "Heck yes!",
@@ -39,7 +40,7 @@ encouragements = [
     "Splendid!", "Too good!", "Zing!", "Way to go!", "On fire!",
     "Clean win!", "Style points!", "Whiz!", "Ace!", "Wowsers!",
     "Bang on!", "Proud of you!", "Keep slaying!", "All-star!", "Superstar!",
-    "Smooth!", "Perfection!", "Slick!", 
+    "Smooth!", "Perfection!", "Slick!", "chrisWow",
     "King stuff!", "Top tier!", "A real one!", "Chef's kiss!", "Ultra win!",
     "Zesty!", "Delightful!", "Gold star!", "Rockstar!", "Flawless!",
     "10/10!", "Nice touch!", "Iconic!", "Gorgeous!", "So proud!",

@@ -113,7 +113,7 @@ class WhichImage(Range):
     
     display_name = "Which image"
     range_start = 1
-    range_end = 49
+    range_end = 51
     default = "random"
     
 class PercentageOfExtraPieces(Range):
@@ -220,9 +220,33 @@ class Rotations(Choice):
 class FakePieces(Range):
     """
     Adds a fake piece to start with and adds a fake piece to the itempool. Just for fun!
+    (I might change this option and allow for more fake pieces later)
     """
 
     display_name = "Fake pieces"
+    range_start = 0
+    range_end = 1
+    default = 0
+    
+class RotateTraps(Range):
+    """
+    Adds a rotate trap to the game, that randomly rotates an unmerged piece.
+    This trap is only added when the rotations option is enabled.
+    (I might change this option and allow for more of these later)
+    """
+    
+    display_name = "Rotate traps"
+    range_start = 0
+    range_end = 1
+    default = 0
+
+class SwapTraps(Range):
+    """
+    Adds a swap trap to the game, that randomly swaps two unmerged pieces.
+    (I might change this option and allow for more of these later)
+    """
+
+    display_name = "Swap traps"
     range_start = 0
     range_end = 1
     default = 0
@@ -268,6 +292,8 @@ class JigsawOptions(PerGameCommonOptions):
     enable_clues: EnableClues
     total_size_of_image: TotalSizeOfImage
     fake_pieces: FakePieces
+    rotate_traps: RotateTraps
+    swap_traps: SwapTraps
     
 jigsaw_option_groups = [
     OptionGroup(
@@ -305,10 +331,17 @@ jigsaw_option_groups = [
         ],
     ),
     OptionGroup(
+        "Optional: traps", 
+        [
+            FakePieces,
+            RotateTraps,
+            SwapTraps,
+        ],
+    ),
+    OptionGroup(
         "Optional: others", 
         [
             EnableClues,
-            FakePieces,
             TotalSizeOfImage,
         ],
     ),
