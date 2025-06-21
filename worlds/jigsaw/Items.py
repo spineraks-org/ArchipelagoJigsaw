@@ -24,9 +24,10 @@ item_table = {
     for i in range(1, 501)
 }
 
-item_table["1 Fake Puzzle Piece"] = ItemData(234785000 + (1 - 1), ItemClassification.trap)
-item_table["Rotate Trap"] = ItemData(234786000 + (1 - 1), ItemClassification.trap)
-item_table["Swap Trap"] = ItemData(234787000 + (1 - 1), ItemClassification.trap)
+for i in range(1, 11):
+    item_table[f"{i} Fake Puzzle Piece{'s' if i > 1 else ''}"] = ItemData(234785000 + (i - 1), ItemClassification.trap)
+    item_table[f"{i} Rotate Trap{'s' if i > 1 else ''}"] = ItemData(234786000 + (i - 1), ItemClassification.trap)
+    item_table[f"{i} Swap Trap{'s' if i > 1 else ''}"] = ItemData(234787000 + (i - 1), ItemClassification.trap)
 
 encouragements = [
     "Good job!", "Wowza!", "You rock!", "Nailed it!", "Heck yes!",

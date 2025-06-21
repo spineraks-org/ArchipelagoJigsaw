@@ -8,7 +8,7 @@ from worlds.AutoWorld import WebWorld, World
 from .Items import JigsawItem, item_table, item_groups, encouragements
 from .Locations import JigsawLocation, location_table
 
-from .Options import JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, jigsaw_option_groups, PlacementOfFillers, Rotations
+from .Options import JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, jigsaw_option_groups, Rotations
 from .Rules import PuzzleBoard
 
 from worlds.LauncherComponents import (
@@ -52,7 +52,7 @@ class JigsawWorld(World):
     
     item_name_groups = item_groups
     
-    ap_world_version = "0.6.6"
+    ap_world_version = "0.7.0"
 
     def _get_jigsaw_data(self):
         return {
@@ -184,7 +184,7 @@ class JigsawWorld(World):
         for pieces in pieces_groups:
             self.random.shuffle(pieces)
             
-        number_of_checks_out_of_logic = math.ceil(self.options.permillage_of_checks_out_of_logic.value * self.npieces / 1000)
+        number_of_checks_out_of_logic = min(self.options.checks_out_of_logic.value, int(self.npieces / 10))
         
         board = PuzzleBoard(self.nx, self.ny)
         
@@ -272,20 +272,34 @@ class JigsawWorld(World):
         self.pieces_needed_per_merge = [0]
         for i in range(1, self.npieces):
             self.pieces_needed_per_merge.append(next(index for index, value in enumerate(self.possible_merges) if value >= i))
+        ## end of calculating and storing logic
+        print(self.possible_merges, self.actual_possible_merges)
         
+        ## start of locations, filling itempool and precollected items
         
         pieces_left = math.ceil(len(self.itempool_pieces) * (1 + self.options.percentage_of_extra_pieces.value / 100))
         
-        max_locs = min(self.npieces - 2,  self.options.maximum_number_of_real_items.value)
-
-        if self.npieces >= 10:
-            max_locs -= self.options.fake_pieces.value + self.options.swap_traps.value
-            if self.options.rotations != Rotations.option_no_rotation:
-                max_locs -= self.options.rotate_traps.value
+        max_locs = min(self.npieces - 2,  self.options.number_of_piece_bundles.value)
         
-        self.pieces_per_location = max((pieces_left + max_locs - 1) // max_locs, self.options.minimum_number_of_pieces_per_real_item.value)     
+        diff_traps = (self.options.number_of_fake_piece_bundles.value >= 1) + \
+            (self.options.number_of_swap_traps.value >= 1) + \
+            (self.options.number_of_rotate_traps.value >= 1 and self.options.rotations != Rotations.option_no_rotation)
+            
+        if diff_traps > 0 and self.npieces >= 10:
+            
+            max_traps_in_pool = self.options.number_of_fake_piece_bundles.value \
+            + self.options.number_of_swap_traps.value \
+            + (self.options.number_of_rotate_traps.value if self.options.rotations != Rotations.option_no_rotation else 0)
+
+            self.locs_traps = max(diff_traps, min(int(max_locs / 2), max_traps_in_pool))
+            locs_pieces = max_locs - self.locs_traps
+        else:
+            locs_pieces = max_locs
+            self.locs_traps = 0
+        
+        self.pieces_per_location = (pieces_left + locs_pieces - 1) // locs_pieces    
         self.number_of_locations = (pieces_left + self.pieces_per_location - 1) // self.pieces_per_location
-        self.pool_pieces = [f"{self.pieces_per_location} Puzzle Piece{'s' if self.pieces_per_location > 1 else ''}"] * self.number_of_locations
+        self.pool_contents = [f"{self.pieces_per_location} Puzzle Piece{'s' if self.pieces_per_location > 1 else ''}"] * self.number_of_locations
                                 
         pieces_from_start = len(self.precollected_pieces)
         
@@ -296,25 +310,51 @@ class JigsawWorld(World):
                 n = pieces_from_start
             self.multiworld.push_precollected(self.create_item(f"{n} Puzzle Piece{'s' if n > 1 else ''}"))
             pieces_from_start -= n
-        if self.options.fake_pieces.value == 1:
-            self.multiworld.push_precollected(self.create_item(f"1 Fake Puzzle Piece"))
-            self.fake_pieces_mimic = self.random.choices([i+1 for i in range(self.npieces)], k=2)
+            
+        if self.locs_traps > 0 and self.npieces >= 10:
+            fakes = self.options.number_of_fake_piece_bundles.value
+            swaps = self.options.number_of_swap_traps.value
+            rotations = self.options.number_of_rotate_traps.value if self.options.rotations != Rotations.option_no_rotation else 0
+            if fakes + swaps + rotations > self.locs_traps:
+                l_fakes = math.ceil(self.locs_traps * fakes / (fakes + swaps + rotations))
+                if swaps > 0:
+                    l_swaps = math.floor((self.locs_traps-l_fakes) * swaps / (swaps + rotations))
+                else:
+                    l_swaps = 0
+                l_rotations = self.locs_traps - l_fakes - l_swaps
+            else:
+                l_fakes = fakes
+                l_swaps = swaps
+                l_rotations = rotations
+                
+            n = self.options.impact_of_fake_piece_bundles.value
+            for i in range(l_fakes):
+                self.pool_contents.append(f"{n} Fake Puzzle Piece{'s' if n > 1 else ''}")
+                
+            self.fake_pieces_mimic = self.random.choices([i+1 for i in range(self.npieces)], k=n*l_fakes+self.options.starting_fake_pieces.value)
+        
+            n = self.options.impact_of_swap_traps.value
+            for i in range(l_swaps):
+                self.pool_contents.append(f"{n} Swap Trap{'s' if n > 1 else ''}")
+            n = self.options.impact_of_rotate_traps.value
+            for i in range(l_rotations):
+                self.pool_contents.append(f"{n} Rotate Trap{'s' if n > 1 else ''}")
         else:
-            self.fake_pieces_mimic = []
+            self.locs_traps = 0
+            self.fake_pieces_mimic = self.random.choices([i+1 for i in range(self.npieces)], k=self.options.starting_fake_pieces.value)
+        
             
-            
+        num = self.options.starting_fake_pieces.value
+        while num > 0:
+            self.multiworld.push_precollected(self.create_item(f"{min(500,num)} Fake Puzzle Piece{'s' if num > 1 else ''}"))
+            num -= min(500,num)
+
+
     def create_items(self):
-        self.multiworld.itempool += [self.create_item(name) for name in self.pool_pieces]
-        if self.options.placement_of_fillers == PlacementOfFillers.option_global:
-            for i in range(self.filler_items_in_pool):
-                self.multiworld.itempool.append(self.create_item(self.filler_encouragements[i]))
-        if self.npieces >= 10:
-            if self.options.fake_pieces.value == 1:
-                self.multiworld.itempool.append(self.create_item("1 Fake Puzzle Piece"))
-            if self.options.rotate_traps.value == 1 and self.options.rotations != Rotations.option_no_rotation:
-                self.multiworld.itempool.append(self.create_item("Rotate Trap"))
-            if self.options.swap_traps.value == 1:
-                self.multiworld.itempool.append(self.create_item("Swap Trap"))
+        self.multiworld.itempool += [self.create_item(name) for name in self.pool_contents]
+        for i in range(self.filler_items_in_pool):
+            self.multiworld.itempool.append(self.create_item(self.filler_encouragements[i]))
+                
 
     def create_regions(self):        
         # simple menu-board construction
@@ -325,10 +365,6 @@ class JigsawWorld(World):
         
         # spread self.number_of_locations piece-items into self.max_score -1 locations
         items = self.number_of_locations 
-        if self.npieces >= 10:
-            items += self.options.fake_pieces.value + self.options.swap_traps.value
-            if self.options.rotations != Rotations.option_no_rotation:
-                items += self.options.rotate_traps.value
 
         locs = max_score - 1  # exclude max_score - 1 which is the win condition        
         
@@ -378,15 +414,22 @@ class JigsawWorld(World):
                     num_pieces += self.pieces_per_location  # by swapping you have retro-actively an extra piece
         item_locations.append(self.npieces - 1)  # add the victory location to the item locations
 
+        # Get self.locs_traps entries from filler_locations and put them in trap_locations, removing them from filler_locations
+        trap_locations = []
+        if self.locs_traps > 0 and len(filler_locations) >= self.locs_traps:
+            trap_locations = self.random.sample(filler_locations, self.locs_traps)
+            for loc in trap_locations:
+                filler_locations.remove(loc)
+                
         # add locations to board, one for every location in the location_table
         all_locations = [
             JigsawLocation(self.player, f"Merge {i} times", 234782000+i, i, board)
-            for i in item_locations
+            for i in item_locations + trap_locations
         ]
         
+
         ###
-        if (self.options.placement_of_fillers == PlacementOfFillers.option_local_only and self.options.enable_forced_local_filler_items.value) or \
-            self.options.placement_of_fillers == PlacementOfFillers.option_global:
+        if self.options.add_fillers:
             all_locations += [
                 JigsawLocation(self.player, f"Merge {i} times", 234782000+i, i, board)
                 for i in filler_locations
@@ -402,12 +445,9 @@ class JigsawWorld(World):
             loc.access_rule = lambda state, count=loc.nmerges: state.has("pcs", self.player, self.pieces_needed_per_merge[count])
         
         ###
-        if self.options.placement_of_fillers == PlacementOfFillers.option_local_only and self.options.enable_forced_local_filler_items.value:
-            for i, loc in enumerate(filler_locations):
-                self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
-        ###
-        if self.options.placement_of_fillers == PlacementOfFillers.option_global:
-            self.filler_items_in_pool = int(self.options.percentage_of_fillers_globally.value / 100 * len(filler_locations))
+        self.filler_items_in_pool = 0
+        if self.options.add_fillers:
+            self.filler_items_in_pool = int(self.options.percentage_fillers_itempool.value / 100 * len(filler_locations))
             for i, loc in enumerate(filler_locations[int(self.filler_items_in_pool):]):
                 self.multiworld.get_location(f"Merge {loc} times", self.player).place_locked_item(self.create_item(self.filler_encouragements[i]))
 
@@ -469,8 +509,7 @@ class JigsawWorld(World):
         slot_data["piece_order"] = self.precollected_pieces + self.itempool_pieces
         slot_data["possible_merges"] = self.possible_merges
         slot_data["actual_possible_merges"] = self.actual_possible_merges
-        slot_data["fake_pieces"] = self.options.fake_pieces.value
-        slot_data["ap_world_version"] = self.ap_world_version
+        slot_data["ap_world_version_2"] = self.ap_world_version
         slot_data["fake_pieces_mimic"] = self.fake_pieces_mimic
         return slot_data
     
