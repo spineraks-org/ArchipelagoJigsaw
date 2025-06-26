@@ -25,11 +25,24 @@ class NumberOfPieceBundles(Range):
     range_start = 25
     range_end = 2000
     default = 250
+    
+class MinimumNumberOfPiecesPerBundle(Range):
+    """
+    This is another way to choose the number of piece bundles.
+    With this option you can choose the minimum number of pieces per bundle.
+    For example if you make this 2, you will get at least 2 pieces at a time. Probably more fun for others!
+    For solo games I would recommend to put this to 1.        
+    """
+    
+    display_name = "Minimum number of pieces per bundle"
+    range_start = 1
+    range_end = 100
+    default = 1
         
 class AddFillers(Toggle):
     """
     Enabling this option makes every merge a check and adds filler items.
-    The next options allows you to choose how many are local and how many are shuffled across the multiworld.
+    The next option allows you to choose how many are local and how many are shuffled across the multiworld.
     """
     
     display_name = "Add fillers"
@@ -158,7 +171,7 @@ class ChecksOutOfLogic(Range):
     This option will make it so that there are always additional checks not considered by logic.
     This makes it easier to get "all your checks in logic".
     Of course this won't make a difference at the very end when few merges are left.
-    The number of checks will never be larger than 10% of the number of pieces.
+    The number of checks out of logic will never be more than 10% of the number of pieces.
     """
 
     display_name = "Checks out of logic"
@@ -221,7 +234,7 @@ class NumberOfRotateTraps(Range):
     
 class ImpactOfRotateTraps(Range):
     """
-    How many clusters each rotate traps affects.
+    How many clusters each rotate trap affects.
     """
 
     display_name = "Impact of rotate traps"
@@ -269,13 +282,28 @@ class SizeOfImage(Range):
     range_start = 30
     range_end = 100
     default = 85
+    
+class DeathLink(Range):
+    """
+    When someone else dies, you'll get rotate traps and swap traps.
+    The number you set here determines how many traps you get.
+    If you set this to 0, deathlink is disabled.
+    (Jigsaw will never trigger death link.)
+    """
+
+    display_name = "Death link"
+    range_start = 0
+    range_end = 10
+    default = 0
 
 @dataclass
 class JigsawOptions(PerGameCommonOptions):
+    death_link: DeathLink
     number_of_pieces: NumberOfPieces
     rotations: Rotations
     percentage_of_extra_pieces: PercentageOfExtraPieces
     number_of_piece_bundles: NumberOfPieceBundles
+    minimum_number_of_pieces_per_bundle: MinimumNumberOfPiecesPerBundle
     add_fillers: AddFillers
     percentage_fillers_itempool: PercentageFillersItempool
     checks_out_of_logic: ChecksOutOfLogic
@@ -314,6 +342,7 @@ jigsaw_option_groups = [
         [
             PercentageOfExtraPieces,
             NumberOfPieceBundles,
+            MinimumNumberOfPiecesPerBundle,
             AddFillers,
             PercentageFillersItempool,
             ChecksOutOfLogic,
@@ -329,7 +358,7 @@ jigsaw_option_groups = [
         ],
     ),
     OptionGroup(
-        "Optional options: traps",
+        "Optional options: traps & deathlink",
         [
             StartingFakePieces,
             NumberOfFakePieceBundles,
@@ -338,6 +367,7 @@ jigsaw_option_groups = [
             ImpactOfRotateTraps,
             NumberOfSwapTraps,
             ImpactOfSwapTraps,
+            DeathLink,
         ],
     ),
     OptionGroup(

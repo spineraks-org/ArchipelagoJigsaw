@@ -273,7 +273,6 @@ class JigsawWorld(World):
         for i in range(1, self.npieces):
             self.pieces_needed_per_merge.append(next(index for index, value in enumerate(self.possible_merges) if value >= i))
         ## end of calculating and storing logic
-        print(self.possible_merges, self.actual_possible_merges)
         
         ## start of locations, filling itempool and precollected items
         
@@ -297,7 +296,7 @@ class JigsawWorld(World):
             locs_pieces = max_locs
             self.locs_traps = 0
         
-        self.pieces_per_location = (pieces_left + locs_pieces - 1) // locs_pieces    
+        self.pieces_per_location = max((pieces_left + locs_pieces - 1) // locs_pieces, self.options.minimum_number_of_pieces_per_bundle.value)   
         self.number_of_locations = (pieces_left + self.pieces_per_location - 1) // self.pieces_per_location
         self.pool_contents = [f"{self.pieces_per_location} Puzzle Piece{'s' if self.pieces_per_location > 1 else ''}"] * self.number_of_locations
                                 
@@ -500,6 +499,7 @@ class JigsawWorld(World):
             "rotations",
             "enable_clues",
             "total_size_of_image",
+            "death_link",
         )
         slot_data = {**slot_data, **jigsaw_options}  # combine the two
         

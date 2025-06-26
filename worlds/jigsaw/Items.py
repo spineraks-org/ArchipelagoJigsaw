@@ -24,8 +24,9 @@ item_table = {
     for i in range(1, 501)
 }
 
-for i in range(1, 11):
+for i in range(1, 501):
     item_table[f"{i} Fake Puzzle Piece{'s' if i > 1 else ''}"] = ItemData(234785000 + (i - 1), ItemClassification.trap)
+for i in range(1, 11):
     item_table[f"{i} Rotate Trap{'s' if i > 1 else ''}"] = ItemData(234786000 + (i - 1), ItemClassification.trap)
     item_table[f"{i} Swap Trap{'s' if i > 1 else ''}"] = ItemData(234787000 + (i - 1), ItemClassification.trap)
 
