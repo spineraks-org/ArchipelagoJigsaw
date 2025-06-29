@@ -62,5 +62,9 @@ for i, phrase in enumerate(encouragements):
 
 
 item_groups = {
-    "Puzzle Pieces": [key for key in item_table.keys() if "Puzzle Piece" in key]
+    "Puzzle Pieces": [f"{i} Puzzle Piece{'s' if i > 1 else ''}" for i in range(1, 501)],
+    "Fake Puzzle Pieces": [f"{i} Fake Puzzle Piece{'s' if i > 1 else ''}" for i in range(1, 501)],
+    "Traps": [f"{i} Fake Puzzle Piece{'s' if i > 1 else ''}" for i in range(1, 501)] +
+              [f"{i} Rotate Trap{'s' if i > 1 else ''}" for i in range(1, 11)] +
+              [f"{i} Swap Trap{'s' if i > 1 else ''}" for i in range(1, 11)],
 }

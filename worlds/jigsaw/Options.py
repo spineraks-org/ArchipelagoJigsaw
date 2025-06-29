@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, PerGameCommonOptions, Range, Toggle, OptionGroup, Visibility
+from Options import Choice, PerGameCommonOptions, Range, Toggle, OptionGroup, Removed
 
 class NumberOfPieces(Range):
     """
@@ -296,6 +296,7 @@ class DeathLink(Range):
     range_end = 10
     default = 0
 
+
 @dataclass
 class JigsawOptions(PerGameCommonOptions):
     death_link: DeathLink
@@ -322,6 +323,16 @@ class JigsawOptions(PerGameCommonOptions):
     impact_of_rotate_traps: ImpactOfRotateTraps
     number_of_swap_traps: NumberOfSwapTraps
     impact_of_swap_traps: ImpactOfSwapTraps
+    #removed:
+    maximum_number_of_real_items: Removed
+    minimum_number_of_pieces_per_real_item: Removed
+    placement_of_fillers: Removed
+    enable_forced_local_filler_items: Removed
+    percentage_of_fillers_globally: Removed
+    permillage_of_checks_out_of_logic: Removed
+    fake_pieces: Removed
+    rotate_traps: Removed
+    swap_traps: Removed
     
 jigsaw_option_groups = [
     OptionGroup("Important options: gameplay",
