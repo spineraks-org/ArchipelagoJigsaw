@@ -8,7 +8,7 @@ from worlds.AutoWorld import WebWorld, World
 from .Items import JigsawItem, item_table, item_groups, encouragements
 from .Locations import JigsawLocation, location_table
 
-from .Options import JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, jigsaw_option_groups, Rotations
+from .Options import JigsawOptions, OrientationOfImage, MemeOneRowOrColumn, PieceOrder, PieceTypeOrder, jigsaw_option_groups, Rotations, GridType
 from .Rules import PuzzleBoard
 
 from worlds.LauncherComponents import (
@@ -52,7 +52,7 @@ class JigsawWorld(World):
     
     item_name_groups = item_groups
     
-    ap_world_version = "0.7.0"
+    ap_world_version = "0.8.0"
 
     def _get_jigsaw_data(self):
         return {
@@ -60,6 +60,12 @@ class JigsawWorld(World):
         }
         
     def calculate_optimal_nx_and_ny(self, number_of_pieces, orientation):
+        
+        if self.options.meme_one_row_or_column.value == MemeOneRowOrColumn.option_one_row:
+            return number_of_pieces, 1
+        if self.options.meme_one_row_or_column.value == MemeOneRowOrColumn.option_one_column:
+            return 1, number_of_pieces
+        
         def mround(x):
             return int(round(x))
 
@@ -101,10 +107,13 @@ class JigsawWorld(World):
         if self.options.orientation_of_image == OrientationOfImage.option_portrait:
             self.orientation = 0.8
         self.nx, self.ny = self.calculate_optimal_nx_and_ny(self.options.number_of_pieces.value, self.orientation)
-        self.npieces = self.nx * self.ny
+        self.max_piece_index = self.nx * self.ny
         
+        self.npieces = self.max_piece_index
+        self.hexagonal = self.options.grid_type == GridType.option_hexagonal
+
         if self.options.piece_order_type == PieceTypeOrder.option_random_order:
-            pieces_groups = [[i for i in range(1, self.npieces + 1)]]
+            pieces_groups = [[i for i in range(1, self.max_piece_index + 1)]]
             self.random.shuffle(pieces_groups[0])
         elif self.options.piece_order_type == PieceTypeOrder.option_four_parts or self.options.piece_order_type == PieceTypeOrder.option_four_parts_non_rotated:
             # Generate a random angle alpha for rotation
@@ -150,7 +159,7 @@ class JigsawWorld(World):
                     + [self.nx * (self.ny - 1) + i for i in range(2, self.nx)] \
                     + [1 + self.nx * i for i in range(1, self.ny - 1)] \
                     + [self.nx + self.nx * i for i in range(1, self.ny - 1)]
-            normal = [i for i in range(1, self.npieces + 1) if i not in corners and i not in edges]
+            normal = [i for i in range(1, self.max_piece_index + 1) if i not in corners and i not in edges]
             self.random.shuffle(corners)
             self.random.shuffle(edges)
             self.random.shuffle(normal)
@@ -183,11 +192,11 @@ class JigsawWorld(World):
         
         for pieces in pieces_groups:
             self.random.shuffle(pieces)
-            
+
         number_of_checks_out_of_logic = min(self.options.checks_out_of_logic.value, int(self.npieces / 10))
-        
-        board = PuzzleBoard(self.nx, self.ny)
-        
+
+        board = PuzzleBoard(self.nx, self.ny, self.hexagonal)
+
         self.precollected_pieces = []
         self.itempool_pieces = []
         
@@ -250,7 +259,7 @@ class JigsawWorld(World):
                     
         self.possible_merges = [- number_of_checks_out_of_logic]
         self.actual_possible_merges = [0]
-        board = PuzzleBoard(self.nx, self.ny)
+        board = PuzzleBoard(self.nx, self.ny, self.hexagonal)
         
         for c, p in enumerate(self.precollected_pieces):
             board.add_piece(p - 1)
@@ -309,6 +318,8 @@ class JigsawWorld(World):
                 n = pieces_from_start
             self.multiworld.push_precollected(self.create_item(f"{n} Puzzle Piece{'s' if n > 1 else ''}"))
             pieces_from_start -= n
+
+        mimic_indices = [i + 1 for i in range(self.npieces)]
             
         if self.locs_traps > 0 and self.npieces >= 10:
             fakes = self.options.number_of_fake_piece_bundles.value
@@ -330,7 +341,7 @@ class JigsawWorld(World):
             for i in range(l_fakes):
                 self.pool_contents.append(f"{n} Fake Puzzle Piece{'s' if n > 1 else ''}")
                 
-            self.fake_pieces_mimic = self.random.choices([i+1 for i in range(self.npieces)], k=n*l_fakes+self.options.starting_fake_pieces.value)
+            self.fake_pieces_mimic = self.random.choices(mimic_indices, k=n*l_fakes+self.options.starting_fake_pieces.value)
         
             n = self.options.impact_of_swap_traps.value
             for i in range(l_swaps):
@@ -340,9 +351,8 @@ class JigsawWorld(World):
                 self.pool_contents.append(f"{n} Rotate Trap{'s' if n > 1 else ''}")
         else:
             self.locs_traps = 0
-            self.fake_pieces_mimic = self.random.choices([i+1 for i in range(self.npieces)], k=self.options.starting_fake_pieces.value)
-        
-            
+            self.fake_pieces_mimic = self.random.choices(mimic_indices, k=self.options.starting_fake_pieces.value)
+
         num = self.options.starting_fake_pieces.value
         while num > 0:
             self.multiworld.push_precollected(self.create_item(f"{min(500,num)} Fake Puzzle Piece{'s' if num > 1 else ''}"))
@@ -389,7 +399,7 @@ class JigsawWorld(World):
             
             do_again = False
             for i in range(1, self.npieces - 1):
-                
+
                 if i in item_locations:
                     num_pieces += self.pieces_per_location
                 if i >= self.possible_merges[min(self.npieces, int(num_pieces))]:
@@ -500,6 +510,7 @@ class JigsawWorld(World):
             "enable_clues",
             "total_size_of_image",
             "death_link",
+            "grid_type"
         )
         slot_data = {**slot_data, **jigsaw_options}  # combine the two
         

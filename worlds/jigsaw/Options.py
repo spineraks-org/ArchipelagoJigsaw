@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, PerGameCommonOptions, Range, Toggle, OptionGroup, Removed
+from Options import Choice, PerGameCommonOptions, Range, Toggle, OptionGroup, Removed, Visibility
 
 class NumberOfPieces(Range):
     """
@@ -73,6 +73,19 @@ class OrientationOfImage(Choice):
     default = 2
 
 
+class MemeOneRowOrColumn(Choice):
+    """
+    Additional meme option!
+    """
+    
+    display_name = "Meme one row or column"
+    option_no_meme = 0
+    option_one_row = 1
+    option_one_column = 2
+    default = 0
+    visibility = Visibility.none
+
+
 class WhichImage(Range):
     """
     Only if you selected the landscape orientation option.
@@ -82,7 +95,7 @@ class WhichImage(Range):
     
     display_name = "Which image"
     range_start = 1
-    range_end = 51
+    range_end = 54
     default = "random"
     
 class PercentageOfExtraPieces(Range):
@@ -295,6 +308,17 @@ class DeathLink(Range):
     range_start = 0
     range_end = 10
     default = 0
+    
+class GridType(Choice):
+    """
+    The type of grid used for the jigsaw puzzle. Square is the default and most common type.
+    But hexagonal grids are also possible, which can make the puzzle more interesting.
+    """
+
+    display_name = "Grid type"
+    option_square = 4
+    option_hexagonal = 6
+    default = 1
 
 
 @dataclass
@@ -310,6 +334,7 @@ class JigsawOptions(PerGameCommonOptions):
     checks_out_of_logic: ChecksOutOfLogic
     orientation_of_image: OrientationOfImage
     which_image: WhichImage
+    meme_one_row_or_column: MemeOneRowOrColumn
     piece_order_type: PieceTypeOrder
     strictness_piece_order_type: StrictnessPieceTypeOrder
     piece_order: PieceOrder
@@ -333,11 +358,13 @@ class JigsawOptions(PerGameCommonOptions):
     fake_pieces: Removed
     rotate_traps: Removed
     swap_traps: Removed
+    grid_type: GridType
     
 jigsaw_option_groups = [
     OptionGroup("Important options: gameplay",
         [
             NumberOfPieces,
+            GridType,
             Rotations,
         ],
     ),
@@ -346,6 +373,7 @@ jigsaw_option_groups = [
         [
             OrientationOfImage,
             WhichImage,
+            MemeOneRowOrColumn,
         ],
     ),
     OptionGroup(

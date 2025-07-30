@@ -60,7 +60,7 @@ class PuzzleBoard:
     # Unused cluster IDs that newly added pieces can be assigned to if they do not merge into an existing cluster.
     _unused_ids: list[int]
 
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int, hexagonal: bool):
         pieces = range(width * height)
         # The maximum number of IDs that could be needed is the maximum number of isolated pieces possible, which is
         # half the number of spaces on the board when even, or half one-more-than-the-number-of-spaces when odd.
@@ -72,7 +72,7 @@ class PuzzleBoard:
         # 5/9  8/16  10/20  13/25
         max_isolated_pieces = len(pieces) // 2 + len(pieces) % 2
         self._unused_ids = list(range(max_isolated_pieces))
-        self.board = [None] * len(pieces)
+        self.board = [None] * (len(pieces))
 
         # Pre-calculate the pieces that are adjacent to each piece.
         adjacent_pieces = []
@@ -80,14 +80,33 @@ class PuzzleBoard:
             piece_connections = []
             x = i % width
             y = i // width
-            if x > 0:
-                piece_connections.append(i - 1)
-            if x < width - 1:
-                piece_connections.append(i + 1)
-            if y > 0:
+            if not hexagonal:
+                if x > 0:
+                    piece_connections.append(i - 1)
+                if x < width - 1:
+                    piece_connections.append(i + 1)
+                if y > 0:
+                    piece_connections.append(i - width)
+                if y < height - 1:
+                    piece_connections.append(i + width)
+            else:
+                if x > 0:
+                    piece_connections.append(i - 1)
+                    if x % 2 == 0:
+                        piece_connections.append(i - width - 1)
+                    else:
+                        piece_connections.append(i + width - 1)
+                if x < width - 1:
+                    piece_connections.append(i + 1)
+                    if x % 2 == 0:
+                        piece_connections.append(i - width + 1)
+                    else:
+                        piece_connections.append(i + width + 1)
                 piece_connections.append(i - width)
-            if y < height - 1:
                 piece_connections.append(i + width)
+                piece_connections = [p for p in piece_connections if p in pieces]
+                    
+                
             adjacent_pieces.append(tuple(piece_connections))
         self.adjacent_pieces = tuple(adjacent_pieces)
         self.merges_count = 0
