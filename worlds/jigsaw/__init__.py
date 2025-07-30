@@ -8,7 +8,7 @@ from worlds.AutoWorld import WebWorld, World
 from .Items import JigsawItem, item_table, item_groups, encouragements
 from .Locations import JigsawLocation, location_table
 
-from .Options import JigsawOptions, OrientationOfImage, MemeOneRowOrColumn, PieceOrder, PieceTypeOrder, jigsaw_option_groups, Rotations, GridType
+from .Options import JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, jigsaw_option_groups, Rotations, GridType
 from .Rules import PuzzleBoard
 
 from worlds.LauncherComponents import (
@@ -61,9 +61,9 @@ class JigsawWorld(World):
         
     def calculate_optimal_nx_and_ny(self, number_of_pieces, orientation):
         
-        if self.options.meme_one_row_or_column.value == MemeOneRowOrColumn.option_one_row:
+        if self.options.grid_type.value == GridType.option_meme_one_row:
             return number_of_pieces, 1
-        if self.options.meme_one_row_or_column.value == MemeOneRowOrColumn.option_one_column:
+        if self.options.grid_type.value == GridType.option_meme_one_column:
             return 1, number_of_pieces
         
         def mround(x):
@@ -154,11 +154,12 @@ class JigsawWorld(World):
             for group in pieces_groups:
                 self.random.shuffle(group)
         else:
-            corners = [1, self.nx, self.nx * (self.ny - 1) + 1, self.nx * self.ny]
+            corners = list(set([1, self.nx, self.nx * (self.ny - 1) + 1, self.nx * self.ny]))
             edges = [i for i in range(2, self.nx)] \
                     + [self.nx * (self.ny - 1) + i for i in range(2, self.nx)] \
                     + [1 + self.nx * i for i in range(1, self.ny - 1)] \
                     + [self.nx + self.nx * i for i in range(1, self.ny - 1)]
+            edges = [i for i in list(set(edges)) if i not in corners]
             normal = [i for i in range(1, self.max_piece_index + 1) if i not in corners and i not in edges]
             self.random.shuffle(corners)
             self.random.shuffle(edges)

@@ -73,19 +73,6 @@ class OrientationOfImage(Choice):
     default = 2
 
 
-class MemeOneRowOrColumn(Choice):
-    """
-    Additional meme option!
-    """
-    
-    display_name = "Meme one row or column"
-    option_no_meme = 0
-    option_one_row = 1
-    option_one_column = 2
-    default = 0
-    visibility = Visibility.none
-
-
 class WhichImage(Range):
     """
     Only if you selected the landscape orientation option.
@@ -313,12 +300,19 @@ class GridType(Choice):
     """
     The type of grid used for the jigsaw puzzle. Square is the default and most common type.
     But hexagonal grids are also possible, which can make the puzzle more interesting.
+    
+    Also, these are meme options: all pieces are just in one row or one column.
+    This means pieces are really long. Be careful with too many pieces, 
+    and consider using the "straight" shape you can select in the game before pressing start.
     """
 
     display_name = "Grid type"
     option_square = 4
     option_hexagonal = 6
-    default = 1
+    
+    option_meme_one_row = 90
+    option_meme_one_column = 91
+    default = 4
 
 
 @dataclass
@@ -334,7 +328,6 @@ class JigsawOptions(PerGameCommonOptions):
     checks_out_of_logic: ChecksOutOfLogic
     orientation_of_image: OrientationOfImage
     which_image: WhichImage
-    meme_one_row_or_column: MemeOneRowOrColumn
     piece_order_type: PieceTypeOrder
     strictness_piece_order_type: StrictnessPieceTypeOrder
     piece_order: PieceOrder
@@ -373,7 +366,6 @@ jigsaw_option_groups = [
         [
             OrientationOfImage,
             WhichImage,
-            MemeOneRowOrColumn,
         ],
     ),
     OptionGroup(
