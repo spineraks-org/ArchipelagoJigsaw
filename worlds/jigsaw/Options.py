@@ -115,7 +115,7 @@ class PieceTypeOrder(Choice):
     This makes it so that you're basically starting and finishing a section four times in your playthrough.
     This may be nice for big puzzles, it decreases the pressure at the start, while making the ending more interesting.
     four_parts_non_rotated always gives axis-aligned quadrants (rectangular grid-like splits, like a +).
-    four_parts can involve rotated splits, so the quadrants may be split like + or × etc.
+    four_parts can involve rotated splits, so the quadrants may be split like + or x etc.
     """
 
     display_name = "Piece type order"
