@@ -64,13 +64,33 @@ class OrientationOfImage(Choice):
     """
     If you're using a custom image, select the orientation here.
     This affects the shape of the puzzle pieces.
+    It doesn't have to be exactly right.
+
+    Here's the aspect ratio's that are calculated with (width x height)
+    square: 1 x 1
+    landscape: 1.5 x 1
+    portrait: 0.8 x 1
+    more_landscape: 2 x 1
+    more_portrait: 0.5 x 1
     """
 
     display_name = "Orientation of image"
     option_square = 1
     option_landscape = 2
     option_portrait = 3
+    option_more_landscape = 4
+    option_more_portrait = 5
     default = 2
+
+
+class UniformPieceSize(Toggle):
+    """
+    If enabled, all puzzle pieces will have equal width and height.
+    Especially fun with rotations, you won't be able to see which rotations are clearly wrong.
+    Note: your image will be cropped if necessary!
+    """
+    display_name = "Uniform piece size"
+    default = False
 
 
 class WhichImage(Range):
@@ -178,17 +198,6 @@ class ChecksOutOfLogic(Range):
     range_start = 0
     range_end = 200
     default = 1
-
-class Rotations(Choice):
-    """
-    Something to make it more realistic but also much harder: pieces can be rotated!
-    """
-
-    display_name = "Rotations"
-    option_no_rotation = 0
-    option_per_90_degrees = 90
-    option_per_180_degrees = 180
-    default = 0
     
 class StartingFakePieces(Range):
     """
@@ -313,13 +322,54 @@ class GridType(Choice):
     option_meme_one_row = 90
     option_meme_one_column = 91
     default = 4
+    
+class GridTypeAndRotations(Choice):
+    """
+    The type of grid used for the jigsaw puzzle, along with the rotation options.
+    """
+
+    display_name = "Grid type and rotations"
+    option_square_no_rotation = 1
+    option_square_180_rotation = 2
+    option_square_90_rotation = 3
+    option_hex_no_rotation = 4
+    option_hex_180_rotation = 5
+    option_hex_120_rotation = 6
+    option_hex_60_rotation = 7
+    option_meme_one_row_no_rotation = 8
+    option_meme_one_row_180_rotation = 9
+    option_meme_one_column_no_rotation = 10
+    option_meme_one_column_180_rotation = 11
+    default = 1
+
+class BorderType(Choice):
+    """
+    The type of border used for the jigsaw puzzle. You can change this in-game.
+    
+    Classic: the typical jigsaw pieces with the innies and outies.
+    Triangle: the typical jigsaw pieces where innies and outies are triangles.
+    Curved: each of the borders are round curves.
+    Diagonal: the borders are straight edges but at an angle.
+    Straight: the borders are straight edges. So the pieces are actual rectangles or hexagons.
+    Chaos: every border can be each of the other border types.
+    """
+
+    display_name = "Border type"
+    option_classic = 1
+    option_triangle = 2
+    option_curved = 3
+    option_diagonal = 4
+    option_straight = 5
+    option_chaos = 6
+    default = 1
 
 
 @dataclass
 class JigsawOptions(PerGameCommonOptions):
     death_link: DeathLink
     number_of_pieces: NumberOfPieces
-    rotations: Rotations
+    grid_type_and_rotations: GridTypeAndRotations
+    uniform_piece_size: UniformPieceSize
     percentage_of_extra_pieces: PercentageOfExtraPieces
     number_of_piece_bundles: NumberOfPieceBundles
     minimum_number_of_pieces_per_bundle: MinimumNumberOfPiecesPerBundle
@@ -351,14 +401,17 @@ class JigsawOptions(PerGameCommonOptions):
     fake_pieces: Removed
     rotate_traps: Removed
     swap_traps: Removed
-    grid_type: GridType
+    grid_type: Removed
+    rotations: Removed
+    border_type: BorderType
     
 jigsaw_option_groups = [
     OptionGroup("Important options: gameplay",
         [
             NumberOfPieces,
-            GridType,
-            Rotations,
+            GridTypeAndRotations,
+            UniformPieceSize,
+            BorderType
         ],
     ),
     OptionGroup(
