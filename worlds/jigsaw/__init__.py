@@ -51,6 +51,8 @@ class JigsawWorld(World):
     location_name_to_id = {name: data.id for name, data in location_table.items()}
     
     item_name_groups = item_groups
+    
+    ap_world_version = "0.9.0"
 
     def _get_jigsaw_data(self):
         return {
@@ -557,7 +559,7 @@ class JigsawWorld(World):
         slot_data["piece_order"] = self.precollected_pieces + self.itempool_pieces
         slot_data["possible_merges"] = self.possible_merges
         slot_data["actual_possible_merges"] = self.actual_possible_merges
-        slot_data["ap_world_version_2"] = self.world_version.as_simple_string()
+        slot_data["ap_world_version_2"] = self.ap_world_version
         slot_data["fake_pieces_mimic"] = self.fake_pieces_mimic
         return slot_data
     
