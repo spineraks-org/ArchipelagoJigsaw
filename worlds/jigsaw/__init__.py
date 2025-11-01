@@ -52,7 +52,7 @@ class JigsawWorld(World):
     
     item_name_groups = item_groups
     
-    ap_world_version = "0.9.0"
+    ap_world_version = "0.9.1"
 
     def _get_jigsaw_data(self):
         return {
