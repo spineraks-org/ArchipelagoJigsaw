@@ -88,6 +88,7 @@ class UniformPieceSize(Toggle):
     If enabled, all puzzle pieces will have equal width and height.
     Especially fun with rotations, you won't be able to see which rotations are clearly wrong.
     Note: your image will be cropped if necessary!
+    Note: this setting is turned off when using meme one row or column.
     """
     display_name = "Uniform piece size"
     default = False
@@ -326,6 +327,7 @@ class GridType(Choice):
 class GridTypeAndRotations(Choice):
     """
     The type of grid used for the jigsaw puzzle, along with the rotation options.
+    The "meme" options create really long or wide pieces in just one row or one column.
     """
 
     display_name = "Grid type and rotations"

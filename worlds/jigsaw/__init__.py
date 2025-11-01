@@ -61,9 +61,11 @@ class JigsawWorld(World):
         
     def calculate_optimal_nx_and_ny(self, number_of_pieces, orientation):
         
-        if self.options.grid_type.value == GridType.option_meme_one_row:
+        if self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_row_no_rotation or self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_row_180_rotation:
+            self.uniform_piece_size = False
             return number_of_pieces, 1
-        if self.options.grid_type.value == GridType.option_meme_one_column:
+        if self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_column_no_rotation or self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_column_180_rotation:
+            self.uniform_piece_size = False
             return 1, number_of_pieces
         
         def mround(x):
@@ -130,8 +132,8 @@ class JigsawWorld(World):
             self.options.grid_type.value == GridTypeAndRotations.option_meme_one_column_180_rotation:
             self.grid_type = GridType.option_meme_one_column
 
-        
-        
+        self.uniform_piece_size = self.options.uniform_piece_size  # gets turned off later when using memes
+
         self.orientation = 1
         if self.options.orientation_of_image == OrientationOfImage.option_landscape:
             self.orientation = 1.5
@@ -546,11 +548,11 @@ class JigsawWorld(World):
             "enable_clues",
             "total_size_of_image",
             "death_link",
-            "uniform_piece_size",
             "border_type"
         )
         slot_data = {**slot_data, **jigsaw_options}  # combine the two
         
+        slot_data["uniform_piece_size"] = self.uniform_piece_size
         slot_data["rotations"] = self.rotations
         slot_data["grid_type"] = self.grid_type
         slot_data["orientation"] = self.orientation
