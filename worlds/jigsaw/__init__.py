@@ -132,7 +132,7 @@ class JigsawWorld(World):
             self.options.grid_type.value == GridTypeAndRotations.option_meme_one_column_180_rotation:
             self.grid_type = GridType.option_meme_one_column
 
-        self.uniform_piece_size = self.options.uniform_piece_size  # gets turned off later when using memes
+        self.uniform_piece_size = self.options.uniform_piece_size.value  # gets turned off later when using memes
 
         self.orientation = 1
         if self.options.orientation_of_image == OrientationOfImage.option_landscape:
