@@ -72,6 +72,7 @@ class OrientationOfImage(Choice):
     portrait: 0.8 x 1
     more_landscape: 2 x 1
     more_portrait: 0.5 x 1
+    image: grid uses a default ratio; the client sizes the puzzle by the actual image aspect.
     """
 
     display_name = "Orientation of image"
@@ -80,6 +81,7 @@ class OrientationOfImage(Choice):
     option_portrait = 3
     option_more_landscape = 4
     option_more_portrait = 5
+    option_image = 6
     default = 2
 
 
@@ -96,9 +98,9 @@ class UniformPieceSize(Toggle):
 
 class WhichImage(Range):
     """
-    Only if you selected the landscape orientation option.
-    This option decides which landscape picture will be set for you. Don't worry, you can change it in the game.
+    For landscape or image orientation: which picture to use. Don't worry, you can change it in the game.
     Every number corresponds to a set image. See the images here: https://jigsaw-ap.netlify.app/images.html
+    With "image" orientation, the client sizes the puzzle by this image's aspect ratio.
     """
     
     display_name = "Which image"

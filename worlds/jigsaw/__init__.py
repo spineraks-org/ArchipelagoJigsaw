@@ -8,7 +8,8 @@ from worlds.AutoWorld import WebWorld, World
 from .Items import JigsawItem, item_table, item_groups, encouragements
 from .Locations import JigsawLocation, location_table
 
-from .Options import GridTypeAndRotations, JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, jigsaw_option_groups, GridType
+from .Options import GridTypeAndRotations, JigsawOptions, OrientationOfImage, PieceOrder, PieceTypeOrder, \
+    jigsaw_option_groups, GridType
 from .Rules import PuzzleBoard
 
 from worlds.LauncherComponents import (
@@ -29,10 +30,8 @@ class JigsawWeb(WebWorld):
             ["Spineraks"],
         )
     ]
-    
+
     option_groups = jigsaw_option_groups
-    
-    
 
 
 class JigsawWorld(World):
@@ -49,28 +48,27 @@ class JigsawWorld(World):
     item_name_to_id = {name: data.code for name, data in item_table.items()}
 
     location_name_to_id = {name: data.id for name, data in location_table.items()}
-    
+
     item_name_groups = item_groups
-    
+
     ap_world_version = "0.9.1"
 
     def _get_jigsaw_data(self):
         return {
             "seed_name": self.multiworld.seed,
         }
-        
+
     def calculate_optimal_nx_and_ny(self, number_of_pieces, orientation):
-        
+
         if self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_row_no_rotation or self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_row_180_rotation:
             self.uniform_piece_size = False
             return number_of_pieces, 1
         if self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_column_no_rotation or self.options.grid_type_and_rotations.value == GridTypeAndRotations.option_meme_one_column_180_rotation:
             self.uniform_piece_size = False
             return 1, number_of_pieces
-        
+
         def mround(x):
             return int(round(x))
-
         def msqrt(x):
             return math.sqrt(x)
 
@@ -143,6 +141,9 @@ class JigsawWorld(World):
             self.orientation = 2
         elif self.options.orientation_of_image == OrientationOfImage.option_more_portrait:
             self.orientation = 0.5
+        elif self.options.orientation_of_image == OrientationOfImage.option_image:
+            # Grid uses a default aspect; client sizes the puzzle by the actual image (Picture-style).
+            self.orientation = 1.5
 
         self.nx, self.ny = self.calculate_optimal_nx_and_ny(self.options.number_of_pieces.value, self.orientation)
         self.max_piece_index = self.nx * self.ny

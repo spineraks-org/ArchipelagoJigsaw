@@ -1,6 +1,6 @@
 {
     "game": "Jigsaw",
-    "authors": ["Spineraks"],
+    "authors": ["Spineraks", "fariel"],
     "minimum_ap_version": "0.6.0",
     "world_version": "0.9.1"
 }
