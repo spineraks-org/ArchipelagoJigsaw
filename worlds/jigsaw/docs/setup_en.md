@@ -43,7 +43,7 @@ every game in your `custom_worlds` and `lib/worlds` folder. You can manually edi
 1. Click upload file and pass it the .zip created in your output folder
 1. Click the "Create New Room" link.
 1. Navigate to https://jigsaw-ap.netlify.app/ and use the Host and Port provided to you by the AP website and the PlayerName from your player file.
-1. You will have the option to upload a custom image or use a [Default Pictures](https://jigsaw-ap.netlify.app/images.html)
+1. You will have the option to upload a custom image or use [Default Pictures](https://jigsaw-ap.netlify.app/images.html)
 1. Solve the Puzzle
 
 ## Joining a MultiWorld Game
@@ -51,5 +51,14 @@ every game in your `custom_worlds` and `lib/worlds` folder. You can manually edi
 When you join a multiworld game, you will be asked to provide your player file to whoever is hosting.
 1. Provide your player file to whoever is hosting
 1. Navigate to https://jigsaw-ap.netlify.app/ and use the Host and Port provided to you and the PlayerName from your player file.
-1. You will have the option to upload a custom image or use a [Default Pictures](https://jigsaw-ap.netlify.app/images.html)
+1. You will have the option to upload a custom image or use [Default Pictures](https://jigsaw-ap.netlify.app/images.html)
 1. Solve the Puzzle
+
+## Beta version
+
+We have a beta/test version running over [here](https://jigsaw-ap-test.netlify.app/). All steps of the process are the same if you want to use this version, just go the different website.
+
+It has the following changes:
+1. Ability to puzzle gifs, videos or window captures.
+2. More quality of life features, like an image preview while puzzling and better zooming.
+4. Unfortunately, players have encountered major lag issues on this version. So if you encounter this too, you can use the default website instead.
