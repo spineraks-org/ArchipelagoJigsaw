@@ -1,6 +1,7 @@
 # Jigsaw Puzzles for Archipelago Setup Guide
 
-The most up-to-date set up steps can be found in the pins on the [#jigsaw channel](https://discord.com/channels/731205301247803413/1409148531637489775) in the [Archipelago discord](https://discord.gg/archipelago).
+- Jigsaw is a custom game made for Archipelago. This means it works perfectly fine with Archipelago, but you can't generate via the archipelago website, instead you need to download archipelago itself and the jigsaw apworld.
+- For reference or for questions: see the thread (and the pins) here: [#jigsaw channel](https://discord.com/channels/731205301247803413/1409148531637489775) in the [Archipelago discord](https://discord.gg/archipelago).
 ## Required Software
 - Browser
 - [Archipelago Launcher](https://github.com/ArchipelagoMW/Archipelago/releases/latest)
